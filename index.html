@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Y-Maze Tracker</title>
+  <meta name="theme-color" content="#111827">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <style>
+    :root{
+      --bg:#f8fafc; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
+      --btnA:#22c55e; --btnB:#3b82f6; --btnC:#6366f1; --btnUndo:#f59e0b;
+      --danger:#ef4444; --primary:#111827;
+      --radius:16px; --shadow:0 10px 20px rgba(2,6,23,0.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    header h1{font-size:36px;margin:0}
+    header .sub{color:var(--muted);margin:6px 0 16px}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:12px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .btn{border:0;border-radius:12px;cursor:pointer;padding:12px 16px;font-weight:700;color:#fff;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+    .btn-text{background:#e5e7eb;color:#111827}
+    .btn-primary{background:#3b82f6}
+    .btn-danger{background:var(--danger)}
+    input[type=text],input[type=number]{border:1px solid var(--border);border-radius:10px;padding:10px;background:#f1f5f9}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-top:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .card header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .mouse-id{font-weight:800;font-size:20px}
+    .trash{background:var(--danger);color:#fff;border:0;border-radius:10px;padding:8px 10px;font-weight:700}
+    .seq{border:1px dashed var(--border);border-radius:10px;padding:10px;height:60px;overflow:auto;white-space:pre-wrap;line-height:32px;font-size:22px;letter-spacing:.1em;background:#f8fafc}
+    .section-title{text-align:center;margin:14px 0 8px;font-weight:800}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+    .stat{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
+    .stat .label{font-size:13px;color:var(--muted)}
+    .stat .value{font-size:24px;font-weight:900;margin-top:2px}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn-a{background:var(--btnA)} .btn-b{background:var(--btnB)} .btn-c{background:var(--btnC)} .btn-undo{background:var(--btnUndo)}
+    .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
+    .timer{display:flex;align-items:center;gap:8px}
+    .timer .time{font-weight:900;font-size:24px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
+    .hidden{display:none}
+    .session-badge{font-weight:700}
+    .grow{flex:1}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Y-Maze Tracker</h1>
+      <div class="sub">Enregistre les entrées de bras pour plusieurs sujets en temps réel.</div>
+    </header>
+
+    <section id="sessionCreate" class="panel">
+      <div class="row">
+        <span class="session-badge">Nouvelle session</span>
+        <input id="sessionName" type="text" placeholder="Nom de la session" class="grow">
+        <button id="createSession" class="btn btn-primary">Créer</button>
+      </div>
+    </section>
+
+    <section id="sessionControls" class="panel hidden">
+      <div class="row">
+        <div id="sessionInfo" class="session-badge"></div>
+        <div class="grow"></div>
+        <div class="timer">
+          <span class="time" id="timerDisplay">08:00</span>
+          <label>Durée (min): <input id="timerMinutes" type="number" min="1" value="8" style="width:80px"></label>
+          <button id="timerPlay" class="btn btn-primary">Play</button>
+          <button id="timerPause" class="btn btn-text">Pause</button>
+          <button id="timerReset" class="btn btn-text">Reset</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <input id="mouseInput" type="text" placeholder="Entrer l'ID de la souris" class="grow">
+        <button id="addBtn" class="btn btn-primary">Ajouter</button>
+        <button id="exportBtn" class="btn btn-text">Exporter CSV</button>
+        <button id="newSession" class="btn btn-danger">Nouvelle session</button>
+      </div>
+    </section>
+
+    <section class="grid" id="cards"></section>
+  </div>
+
+<script>
+// --- Storage ---
+const KEY='ymaze.v4';
+const load=()=>JSON.parse(localStorage.getItem(KEY)||'{}');
+const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
+function newState(name){const m=8;return{session:{name,startedAt:new Date().toISOString()},mice:[],timer:{duration:m*60,remaining:m*60,running:false,last:null}};}
+function newMouse(id){return{id,seq:['C']};}
+
+// --- Stats ---
+function computeStats(seq){
+  const entries=Math.max(0,seq.length-1);
+  let alters=0;for(let i=1;i+2<seq.length;i++){const[x,y,z]=[seq[i],seq[i+1],seq[i+2]];if(x!==y&&y!==z&&x!==z)alters++;}
+  const denom=Math.max(0,entries-2);
+  const ratio=denom>0?(alters/denom*100):0;
+  return{entries,alters,ratio:Math.round(ratio*1000)/1000};
+}
+
+// --- UI ---
+const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes');
+function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}}
+function render(){setView();const s=load();if(!s.session)return;timerMinutes.value=Math.round(s.timer.duration/60);const mm=String(Math.floor(s.timer.remaining/60)).padStart(2,'0'),ss=String(s.timer.remaining%60).padStart(2,'0');timerDisplay.textContent=`${mm}:${ss}`;cardsEl.innerHTML='';for(const m of s.mice){const{entries,alters,ratio}=computeStats(m.seq);const c=document.createElement('article');c.className='card';c.innerHTML=`<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header><div class="seq">${m.seq.join(' ')}</div><div class="section-title">Analyse</div><div class="stats"><div class="stat"><div class="label">Entrées</div><div class="value">${entries}</div></div><div class="stat"><div class="label">Alters.</div><div class="value">${alters}</div></div><div class="stat"><div class="label">Ratio %</div><div class="value">${ratio.toFixed(3)}</div></div></div><div class="actions"><button class="btn btn-a" data-letter="A" data-id="${m.id}">A</button><button class="btn btn-b" data-letter="B" data-id="${m.id}">B</button><button class="btn btn-c" data-letter="C" data-id="${m.id}">C</button><button class="btn btn-undo" data-undo="${m.id}">Undo</button></div>`;cardsEl.appendChild(c);}}
+
+// --- Session actions ---
+document.getElementById('createSession').onclick=()=>{const n=document.getElementById('sessionName').value.trim();if(!n)return;save(newState(n));document.getElementById('sessionName').value='';render();};
+document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();}};
+
+// --- Mice actions ---
+document.getElementById('addBtn').onclick=()=>{const i=document.getElementById('mouseInput');const id=i.value.trim();if(!id)return;const s=load();if(!s.session)return;if(s.mice.some(m=>m.id===id)){i.value='';return;}s.mice.push(newMouse(id));save(s);i.value='';render();};
+document.getElementById('mouseInput').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addBtn').click();};
+cardsEl.onclick=e=>{const t=e.target,s=load();if(!s.session)return;if(t.dataset.letter){const m=s.mice.find(x=>x.id===t.dataset.id);if(!m)return;m.seq.push(t.dataset.letter);save(s);render();}else if(t.dataset.undo){const m=s.mice.find(x=>x.id===t.dataset.undo);if(!m)return;if(m.seq.length>1)m.seq.pop();save(s);render();}else if(t.classList.contains('trash')){const id=t.dataset.id;s.mice=s.mice.filter(x=>x.id!==id);save(s);render();}};
+
+// --- Timer ---
+let rafId=null;
+function tick(){const s=load();if(!s.timer.running)return;const now=Date.now();const last=s.timer.last||now;const dt=Math.floor((now-last)/1000);if(dt>0){s.timer.remaining=Math.max(0,s.timer.remaining-dt);s.timer.last=now;if(s.timer.remaining===0){s.timer.running=false;s.timer.last=null;}save(s);render();}rafId=requestAnimationFrame(tick);}
+document.getElementById('timerPlay').onclick=()=>{const s=load();if(!s.session)return;if(!s.timer.running){s.timer.running=true;s.timer.last=Date.now();save(s);if(!rafId)rafId=requestAnimationFrame(tick);}};
+document.getElementById('timerPause').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;save(s);if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
+document.getElementById('timerReset').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;s.timer.remaining=s.timer.duration;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
+timerMinutes.onchange=()=>{const mins=Math.max(1,parseInt(timerMinutes.value||'8',10));const s=load();s.timer.duration=mins*60;s.timer.remaining=s.timer.duration;s.timer.running=false;s.timer.last=null;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
+
+// --- CSV Export ---
+document.getElementById('exportBtn').onclick=()=>{const s=load();if(!s.session)return;const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];for(const m of s.mice){const r=computeStats(m.seq);rows.push([s.session.name,s.session.startedAt,m.id,r.entries,r.alters,r.ratio.toFixed(3),m.seq.join('')]);}const csv=rows.map(r=>r.map(v=>String(v).includes(',')?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');const ts=new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);a.href=URL.createObjectURL(blob);a.download=`${s.session.name}_${ts}.csv`;document.body.appendChild(a);a.click();a.remove();};
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}
+render();
+</script>
+</body>
+</html>
