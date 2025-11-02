@@ -32,4 +32,4 @@ To install it:
 
 ---
 
-© 2025 – Open source and freely reusable for scientific and educational purposes.
+© 2025
