@@ -9,7 +9,6 @@ Access the live app here:
 👉 [https://ymaze-tracker-pwa.vercel.app/](https://ymaze-tracker-pwa.vercel.app/)
 
 ---
-
 ## Features
 
 * Record arm entries (A, B, C) during Y-Maze sessions
