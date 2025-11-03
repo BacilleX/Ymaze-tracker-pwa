@@ -3,10 +3,6 @@
 This repository contains the **source code** for the Y-Maze Tracker web application.
 You are free to use, modify, and distribute this code under the terms of the included license.
 
-## Online version
-
-Access the live app here:
-👉 [https://ymaze-tracker-pwa.vercel.app/](https://ymaze-tracker-pwa.vercel.app/)
 
 ---
 ## Features

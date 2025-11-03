@@ -13,10 +13,13 @@
       --btnA:#22c55e; --btnB:#3b82f6; --btnC:#6366f1; --btnUndo:#f59e0b;
       --danger:#ef4444; --primary:#111827;
       --radius:16px; --shadow:0 10px 20px rgba(2,6,23,0.08);
+      --zoom:1;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
-    .container{max-width:1200px;margin:0 auto;padding:24px}
+    /* apply zoom (works in modern browsers) */
+    .container{max-width:1200px;margin:0 auto;padding:24px;zoom:var(--zoom)}
     header h1{font-size:36px;margin:0}
     header .sub{color:var(--muted);margin:6px 0 16px}
     .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:12px}
@@ -46,6 +49,25 @@
     .hidden{display:none}
     .session-badge{font-weight:700}
     .grow{flex:1}
+
+    /* Responsive adjustments */
+    @media (max-width:900px){
+      .grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+      header h1{font-size:28px}
+      .seq{height:56px;font-size:20px;line-height:28px}
+      .btn{padding:10px 12px}
+    }
+    @media (max-width:600px){
+      .grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+      .container{padding:12px}
+      header h1{font-size:22px}
+      .timer .time{font-size:18px;padding:6px 8px}
+      input[type=text],input[type=number]{padding:8px}
+      .seq{height:48px;font-size:18px;line-height:24px}
+      .btn{padding:8px 10px;border-radius:10px}
+      .actions{grid-template-columns:repeat(4,1fr)}
+      .btn-a,.btn-b,.btn-c,.btn-undo{padding:8px 6px}
+    }
   </style>
 </head>
 <body>
@@ -73,6 +95,10 @@
           <button id="timerPlay" class="btn btn-primary">Play</button>
           <button id="timerPause" class="btn btn-text">Pause</button>
           <button id="timerReset" class="btn btn-text">Reset</button>
+          <!-- Zoom controls -->
+          <button id="zoomOut" class="btn btn-text" title="Dézoomer">-</button>
+          <button id="zoomReset" class="btn btn-text" title="Reset zoom">1x</button>
+          <button id="zoomIn" class="btn btn-text" title="Zoomer">+</button>
         </div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -91,7 +117,7 @@
 const KEY='ymaze.v4';
 const load=()=>JSON.parse(localStorage.getItem(KEY)||'{}');
 const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
-function newState(name){const m=8;return{session:{name,startedAt:new Date().toISOString()},mice:[],timer:{duration:m*60,remaining:m*60,running:false,last:null}};}
+function newState(name){const m=8;return{session:{name,startedAt:new Date().toISOString()},mice:[],timer:{duration:m*60,remaining:m*60,running:false,last:null},uiZoom:1};}
 function newMouse(id){return{id,seq:['C']};}
 
 // --- Stats ---
@@ -103,32 +129,134 @@ function computeStats(seq){
   return{entries,alters,ratio:Math.round(ratio*1000)/1000};
 }
 
-// --- UI ---
+// --- UI helpers ---
 const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes');
 function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}}
-function render(){setView();const s=load();if(!s.session)return;timerMinutes.value=Math.round(s.timer.duration/60);const mm=String(Math.floor(s.timer.remaining/60)).padStart(2,'0'),ss=String(s.timer.remaining%60).padStart(2,'0');timerDisplay.textContent=`${mm}:${ss}`;cardsEl.innerHTML='';for(const m of s.mice){const{entries,alters,ratio}=computeStats(m.seq);const c=document.createElement('article');c.className='card';c.innerHTML=`<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header><div class="seq">${m.seq.join(' ')}</div><div class="section-title">Analyse</div><div class="stats"><div class="stat"><div class="label">Entrées</div><div class="value">${entries}</div></div><div class="stat"><div class="label">Alters.</div><div class="value">${alters}</div></div><div class="stat"><div class="label">Ratio %</div><div class="value">${ratio.toFixed(3)}</div></div></div><div class="actions"><button class="btn btn-a" data-letter="A" data-id="${m.id}">A</button><button class="btn btn-b" data-letter="B" data-id="${m.id}">B</button><button class="btn btn-c" data-letter="C" data-id="${m.id}">C</button><button class="btn btn-undo" data-undo="${m.id}">Undo</button></div>`;cardsEl.appendChild(c);}}
+function applyZoomFromState(){const s=load();const z=(s && s.uiZoom)?s.uiZoom:1;document.documentElement.style.setProperty('--zoom',z);}
+function formatTime(sec){const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');return `${mm}:${ss}`;}
+
+// Create a single card element for a mouse
+function createCardElement(m){
+  const {entries,alters,ratio}=computeStats(m.seq);
+  const c=document.createElement('article');c.className='card';
+  c.innerHTML = `<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
+    <div class="seq">${m.seq.join(' ')}</div>
+    <div class="section-title">Analyse</div>
+    <div class="stats">
+      <div class="stat"><div class="label">Entrées</div><div class="value">${entries}</div></div>
+      <div class="stat"><div class="label">Alters.</div><div class="value">${alters}</div></div>
+      <div class="stat"><div class="label">Ratio %</div><div class="value">${ratio.toFixed(3)}</div></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-a" data-letter="A" data-id="${m.id}">A</button>
+      <button class="btn btn-b" data-letter="B" data-id="${m.id}">B</button>
+      <button class="btn btn-c" data-letter="C" data-id="${m.id}">C</button>
+      <button class="btn btn-undo" data-undo="${m.id}">Undo</button>
+    </div>`;
+  return c;
+}
+
+function updateCardElement(cardEl, m){
+  const stats = computeStats(m.seq);
+  const seqEl = cardEl.querySelector('.seq');
+  if(seqEl) seqEl.textContent = m.seq.join(' ');
+  const vals = cardEl.querySelectorAll('.stat .value');
+  if(vals && vals.length>=3){
+    vals[0].textContent = stats.entries;
+    vals[1].textContent = stats.alters;
+    vals[2].textContent = stats.ratio.toFixed(3);
+  }
+}
+
+// Full render (used on session create / load)
+function render(){
+  setView();
+  const s=load();
+  if(!s.session) return;
+  applyZoomFromState();
+  timerMinutes.value=Math.round(s.timer.duration/60);
+  timerDisplay.textContent = formatTime(s.timer.remaining);
+  cardsEl.innerHTML='';
+  for(const m of s.mice){
+    cardsEl.appendChild(createCardElement(m));
+  }
+}
 
 // --- Session actions ---
 document.getElementById('createSession').onclick=()=>{const n=document.getElementById('sessionName').value.trim();if(!n)return;save(newState(n));document.getElementById('sessionName').value='';render();};
-document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();}};
+document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
 
 // --- Mice actions ---
-document.getElementById('addBtn').onclick=()=>{const i=document.getElementById('mouseInput');const id=i.value.trim();if(!id)return;const s=load();if(!s.session)return;if(s.mice.some(m=>m.id===id)){i.value='';return;}s.mice.push(newMouse(id));save(s);i.value='';render();};
+document.getElementById('addBtn').onclick=()=>{const i=document.getElementById('mouseInput');const id=i.value.trim();if(!id)return;const s=load();if(!s.session)return;if(s.mice.some(m=>m.id===id)){i.value='';return;}const m=newMouse(id);s.mice.push(m);save(s);i.value='';// append single card (no full re-render)
+cardsEl.appendChild(createCardElement(m));};
 document.getElementById('mouseInput').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addBtn').click();};
-cardsEl.onclick=e=>{const t=e.target,s=load();if(!s.session)return;if(t.dataset.letter){const m=s.mice.find(x=>x.id===t.dataset.id);if(!m)return;m.seq.push(t.dataset.letter);save(s);render();}else if(t.dataset.undo){const m=s.mice.find(x=>x.id===t.dataset.undo);if(!m)return;if(m.seq.length>1)m.seq.pop();save(s);render();}else if(t.classList.contains('trash')){const id=t.dataset.id;s.mice=s.mice.filter(x=>x.id!==id);save(s);render();}};
+
+// Efficient event delegation: update only affected card DOM
+cardsEl.onclick=e=>{
+  const t=e.target;
+  const s=load();
+  if(!s.session) return;
+
+  // Letter buttons
+  if(t.dataset.letter){
+    const id=t.dataset.id;
+    const m=s.mice.find(x=>x.id===id);
+    if(!m) return;
+    m.seq.push(t.dataset.letter);
+    save(s);
+    const card = t.closest('.card');
+    if(card) updateCardElement(card, m);
+    return;
+  }
+
+  // Undo
+  if(t.dataset.undo){
+    const id=t.dataset.undo;
+    const m=s.mice.find(x=>x.id===id);
+    if(!m) return;
+    if(m.seq.length>1) m.seq.pop();
+    save(s);
+    const card = t.closest('.card');
+    if(card) updateCardElement(card, m);
+    return;
+  }
+
+  // Trash
+  if(t.classList.contains('trash')){
+    const id=t.dataset.id;
+    s.mice = s.mice.filter(x=>x.id!==id);
+    save(s);
+    const card = t.closest('.card');
+    if(card) card.remove();
+    return;
+  }
+};
 
 // --- Timer ---
 let rafId=null;
-function tick(){const s=load();if(!s.timer.running)return;const now=Date.now();const last=s.timer.last||now;const dt=Math.floor((now-last)/1000);if(dt>0){s.timer.remaining=Math.max(0,s.timer.remaining-dt);s.timer.last=now;if(s.timer.remaining===0){s.timer.running=false;s.timer.last=null;}save(s);render();}rafId=requestAnimationFrame(tick);}
-document.getElementById('timerPlay').onclick=()=>{const s=load();if(!s.session)return;if(!s.timer.running){s.timer.running=true;s.timer.last=Date.now();save(s);if(!rafId)rafId=requestAnimationFrame(tick);}};
+function tick(){const s=load();if(!s.timer.running)return;const now=Date.now();const last=s.timer.last||now;const dt=Math.floor((now-last)/1000);if(dt>0){s.timer.remaining=Math.max(0,s.timer.remaining-dt);s.timer.last=now;if(s.timer.remaining===0){s.timer.running=false;s.timer.last=null;}save(s);timerDisplay.textContent=formatTime(s.timer.remaining);}rafId=requestAnimationFrame(tick);}
+document.getElementById('timerPlay').onclick=()=>{const s=load();if(!s.session)return;if(!s.timer.running){s.timer.running=true;s.timer.last=Date.now();save(s);if(!rafId)rafId=requestAnimationFrame(tick);} };
 document.getElementById('timerPause').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;save(s);if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
 document.getElementById('timerReset').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;s.timer.remaining=s.timer.duration;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
 timerMinutes.onchange=()=>{const mins=Math.max(1,parseInt(timerMinutes.value||'8',10));const s=load();s.timer.duration=mins*60;s.timer.remaining=s.timer.duration;s.timer.running=false;s.timer.last=null;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
 
+// --- Zoom controls ---
+function setZoom(z){
+  const s=load();
+  s.uiZoom = Math.max(0.6,Math.min(1.6,Number(z)));
+  save(s);
+  document.documentElement.style.setProperty('--zoom', s.uiZoom);
+}
+document.getElementById('zoomIn').onclick=()=>{const s=load();setZoom((s.uiZoom||1)*1.1);};
+document.getElementById('zoomOut').onclick=()=>{const s=load();setZoom((s.uiZoom||1)/1.1);};
+document.getElementById('zoomReset').onclick=()=>{setZoom(1);};
+
 // --- CSV Export ---
 document.getElementById('exportBtn').onclick=()=>{const s=load();if(!s.session)return;const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];for(const m of s.mice){const r=computeStats(m.seq);rows.push([s.session.name,s.session.startedAt,m.id,r.entries,r.alters,r.ratio.toFixed(3),m.seq.join('')]);}const csv=rows.map(r=>r.map(v=>String(v).includes(',')?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');const ts=new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);a.href=URL.createObjectURL(blob);a.download=`${s.session.name}_${ts}.csv`;document.body.appendChild(a);a.click();a.remove();};
 
+// --- Service worker ---
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}
+applyZoomFromState();
 render();
 </script>
 </body>
