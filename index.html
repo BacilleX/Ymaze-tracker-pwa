@@ -144,6 +144,10 @@
 
     .hidden{display:none}
     .session-badge{font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;font-size:0.85rem}
+    .session-name-container{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+    .session-name-display{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .session-rename{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .session-rename-input{flex:1;min-width:160px}
     .grow{flex:1}
 
     @media (max-width:900px){
@@ -208,7 +212,17 @@
 
     <section id="sessionControls" class="panel hidden">
       <div class="row">
-        <div id="sessionInfo" class="session-badge"></div>
+        <div class="session-name-container">
+          <div id="sessionNameDisplay" class="session-name-display">
+            <div id="sessionInfo" class="session-badge"></div>
+            <button id="sessionRenameBtn" type="button" class="btn btn-text">Renommer</button>
+          </div>
+          <div id="sessionRenameForm" class="session-rename hidden">
+            <input id="sessionRenameInput" type="text" class="session-rename-input" placeholder="Nom de la session">
+            <button id="sessionRenameSave" type="button" class="btn btn-primary">Enregistrer</button>
+            <button id="sessionRenameCancel" type="button" class="btn btn-text">Annuler</button>
+          </div>
+        </div>
         <div class="grow"></div>
         <div class="timer">
           <div class="timer-left">
@@ -264,7 +278,19 @@ function computeStats(seq){
 }
 
 // --- UI helpers ---
-const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes'),feedbackEl=document.getElementById('feedback');
+const sessionCreate=document.getElementById('sessionCreate'),
+sessionControls=document.getElementById('sessionControls'),
+sessionInfo=document.getElementById('sessionInfo'),
+sessionNameDisplay=document.getElementById('sessionNameDisplay'),
+sessionRenameForm=document.getElementById('sessionRenameForm'),
+sessionRenameInput=document.getElementById('sessionRenameInput'),
+sessionRenameBtn=document.getElementById('sessionRenameBtn'),
+sessionRenameSave=document.getElementById('sessionRenameSave'),
+sessionRenameCancel=document.getElementById('sessionRenameCancel'),
+cardsEl=document.getElementById('cards'),
+timerDisplay=document.getElementById('timerDisplay'),
+timerMinutes=document.getElementById('timerMinutes'),
+feedbackEl=document.getElementById('feedback');
 let feedbackTimeout=null;
 function hideMessage(){if(!feedbackEl)return;clearTimeout(feedbackTimeout);feedbackEl.classList.add('hidden');}
 function showMessage(message,type='error'){
@@ -276,9 +302,45 @@ function showMessage(message,type='error'){
   clearTimeout(feedbackTimeout);
   feedbackTimeout=setTimeout(()=>feedbackEl.classList.add('hidden'),4000);
 }
-function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}hideMessage();}
+function setView(){
+  const s=load();
+  if(!s.session){
+    sessionCreate.classList.remove('hidden');
+    sessionControls.classList.add('hidden');
+    cardsEl.innerHTML='';
+    if(sessionNameDisplay&&sessionRenameForm){
+      sessionNameDisplay.classList.remove('hidden');
+      sessionRenameForm.classList.add('hidden');
+      if(sessionRenameInput)sessionRenameInput.value='';
+    }
+  }else{
+    sessionCreate.classList.add('hidden');
+    sessionControls.classList.remove('hidden');
+    sessionInfo.textContent='Session: '+s.session.name;
+  }
+  hideMessage();
+}
 function applyZoomFromState(){const s=load();const z=(s && s.uiZoom)?s.uiZoom:1;document.documentElement.style.setProperty('--zoom',z);const valueEl=document.getElementById('zoomValue');if(valueEl){valueEl.textContent=`${Math.round(z*100)}%`;}}
 function formatTime(sec){const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');return `${mm}:${ss}`;}
+
+function toggleRenameForm(show){
+  if(!sessionNameDisplay||!sessionRenameForm)return;
+  if(show){
+    sessionNameDisplay.classList.add('hidden');
+    sessionRenameForm.classList.remove('hidden');
+    if(sessionRenameInput){
+      const s=load();
+      sessionRenameInput.value=s.session?s.session.name:'';
+      sessionRenameInput.focus();
+      if(sessionRenameInput.select)sessionRenameInput.select();
+    }
+    hideMessage();
+  }else{
+    sessionNameDisplay.classList.remove('hidden');
+    sessionRenameForm.classList.add('hidden');
+    if(sessionRenameInput)sessionRenameInput.value='';
+  }
+}
 
 // Create a single card element for a mouse
 function createCardElement(m){
@@ -341,8 +403,31 @@ const handleCreateSession=()=>{
   hideMessage();
   render();
 };
+const handleRenameSession=()=>{
+  if(!sessionRenameInput)return;
+  const s=load();
+  if(!s.session)return;
+  const newName=sessionRenameInput.value.trim();
+  if(!newName){showMessage('Veuillez saisir un nom de session.');sessionRenameInput.focus();return;}
+  const oldName=s.session.name;
+  const storedNames=loadSessionNames();
+  const namesWithoutCurrent=storedNames.filter(n=>n!==oldName);
+  if(namesWithoutCurrent.includes(newName)){showMessage('Ce nom de session existe déjà.');sessionRenameInput.focus();return;}
+  s.session.name=newName;
+  save(s);
+  const updatedNames=[...namesWithoutCurrent];
+  if(!updatedNames.includes(newName))updatedNames.push(newName);
+  storeSessionNames(updatedNames);
+  sessionInfo.textContent='Session: '+newName;
+  toggleRenameForm(false);
+  showMessage('Nom de session mis à jour.','success');
+};
 document.getElementById('createSession').onclick=handleCreateSession;
 document.getElementById('sessionName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleCreateSession();}});
+if(sessionRenameBtn)sessionRenameBtn.onclick=()=>{const s=load();if(!s.session)return;toggleRenameForm(true);};
+if(sessionRenameCancel)sessionRenameCancel.onclick=()=>toggleRenameForm(false);
+if(sessionRenameSave)sessionRenameSave.onclick=()=>handleRenameSession();
+if(sessionRenameInput)sessionRenameInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleRenameSession();}if(e.key==='Escape'){e.preventDefault();toggleRenameForm(false);}});
 document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
 
 // --- Mice actions ---
