@@ -452,7 +452,7 @@ function createCardElement(m){
   const {entries,alters,ratio}=computeStats(m.seq);
   const displayRatio = (typeof ratio === 'number') ? ratio.toFixed(1) : '0.0'; // show 1 decimal in the UI
   const c=document.createElement('article');c.className='card';
-  c.innerHTML = `<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
+  c.innerHTML = `<header><div class="mouse-id">Mouse ID: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
     <div class="seq">${m.seq.join(' ')}</div>
     <div class="section-title">Analyse</div>
     <div class="stats">
