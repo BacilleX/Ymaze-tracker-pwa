@@ -18,41 +18,43 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text)}
-+   /* make custom "buttons" respond faster on mobile and avoid tap highlight */
-+   .btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
-    /* apply zoom (works in modern browsers) */
-    .container{max-width:1200px;margin:0 auto;padding:24px;zoom:var(--zoom)}
-    header h1{font-size:36px;margin:0}
-    header .sub{color:var(--muted);margin:6px 0 16px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:12px}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .btn{border:0;border-radius:12px;cursor:pointer;padding:12px 16px;font-weight:700;color:#fff;box-shadow:var(--shadow)}
-    .btn:active{transform:translateY(1px)}
-    .btn-text{background:#e5e7eb;color:#111827}
-    .btn-primary{background:#3b82f6}
-    .btn-danger{background:var(--danger)}
-    input[type=text],input[type=number]{border:1px solid var(--border);border-radius:10px;padding:10px;background:#f1f5f9}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-top:16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .card header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .mouse-id{font-weight:800;font-size:20px}
-    .trash{background:var(--danger);color:#fff;border:0;border-radius:10px;padding:8px 10px;font-weight:700}
-+   /* ensure role=button elements look & behave like buttons */
-+   [role="button"]{display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-    .seq{border:1px dashed var(--border);border-radius:10px;padding:10px;height:60px;overflow:auto;white-space:pre-wrap;line-height:32px;font-size:22px;letter-spacing:.1em;background:#f8fafc}
-    .section-title{text-align:center;margin:14px 0 8px;font-weight:800}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-    .stat{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
-    .stat .label{font-size:13px;color:var(--muted)}
-    .stat .value{font-size:24px;font-weight:900;margin-top:2px}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .btn-a{background:var(--btnA)} .btn-b{background:var(--btnB)} .btn-c{background:var(--btnC)} .btn-undo{background:var(--btnUndo)}
-    .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
-    .timer{display:flex;align-items:center;gap:8px}
-    .timer .time{font-weight:900;font-size:24px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
-    .hidden{display:none}
-    .session-badge{font-weight:700}
-    .grow{flex:1}
+/* make custom "buttons" respond faster on mobile and avoid tap highlight */
+.btn{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+/* apply zoom (works in modern browsers) */
+.container{max-width:1200px;margin:0 auto;padding:24px;zoom:var(--zoom)}
+header h1{font-size:36px;margin:0}
+header .sub{color:var(--muted);margin:6px 0 16px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:12px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;cursor:pointer;padding:12px 16px;font-weight:700;color:#fff;box-shadow:var(--shadow)}
+.btn:active{transform:translateY(1px)}
+.btn-text{background:#e5e7eb;color:#111827}
+.btn-primary{background:#3b82f6}
+.btn-danger{background:var(--danger)}
+input[type=text],input[type=number]{border:1px solid var(--border);border-radius:10px;padding:10px;background:#f1f5f9}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.card header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mouse-id{font-weight:800;font-size:20px}
+.trash{background:var(--danger);color:#fff;border:0;border-radius:10px;padding:8px 10px;font-weight:700}
+/* ensure role=button elements look & behave like buttons */
+[role="button"]{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;padding:8px 12px}
+[role="button"]:focus{outline:3px solid Highlight;outline-offset:2px}
+[role="button"]:active{transform:translateY(1px)}
+.seq{border:1px dashed var(--border);border-radius:10px;padding:10px;height:60px;overflow:auto;white-space:pre-wrap;line-height:32px;font-size:22px;letter-spacing:.1em;background:#f8fafc}
+.section-title{text-align:center;margin:14px 0 8px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
+.stat .label{font-size:13px;color:var(--muted)}
+.stat .value{font-size:24px;font-weight:900;margin-top:2px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-a{background:var(--btnA)} .btn-b{background:var(--btnB)} .btn-c{background:var(--btnC)} .btn-undo{background:var(--btnUndo)}
+.topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.timer{display:flex;align-items:center;gap:8px}
+.timer .time{font-weight:900;font-size:24px;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
+.hidden{display:none}
+.session-badge{font-weight:700}
+.grow{flex:1}
 
     /* Responsive adjustments */
     @media (max-width:900px){
