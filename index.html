@@ -239,7 +239,7 @@
       <div class="row">
         <input id="mouseInput" type="text" placeholder="Entrer l'ID de la souris" class="grow">
         <button id="addBtn" class="btn btn-primary">Ajouter</button>
-        <button id="exportBtn" class="btn btn-text">Exporter CSV</button>
+        <button id="exportBtn" class="btn btn-text">Export</button>
         <button id="newSession" class="btn btn-danger">Nouvelle session</button>
       </div>
     </section>
@@ -337,7 +337,7 @@ function toggleRenameForm(show){
 // Create a single card element for a mouse
 function createCardElement(m){
   const {entries,alters,ratio}=computeStats(m.seq);
-  const displayRatio = Math.round(ratio); // show integer percent in the UI
+  const displayRatio = (typeof ratio === 'number') ? ratio.toFixed(1) : '0.0'; // show 1 decimal in the UI
   const c=document.createElement('article');c.className='card';
   c.innerHTML = `<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
     <div class="seq">${m.seq.join(' ')}</div>
@@ -364,7 +364,7 @@ function updateCardElement(cardEl, m){
   if(vals && vals.length>=3){
     vals[0].textContent = stats.entries;
     vals[1].textContent = stats.alters;
-    vals[2].textContent = Math.round(stats.ratio); // integer percent in the UI
+    vals[2].textContent = (typeof stats.ratio === 'number') ? stats.ratio.toFixed(1) : '0.0'; // 1 decimal in the UI
   }
 }
 
@@ -524,7 +524,40 @@ document.getElementById('zoomOut').onclick=()=>{const s=load();setZoom((s.uiZoom
 document.getElementById('zoomReset').onclick=()=>{setZoom(1);};
 
 // --- CSV Export ---
-document.getElementById('exportBtn').onclick=()=>{const s=load();if(!s.session)return;const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];for(const m of s.mice){const r=computeStats(m.seq);rows.push([s.session.name,s.session.startedAt,m.id,r.entries,r.alters,r.ratio.toFixed(3),m.seq.join('')]);}const csv=rows.map(r=>r.map(v=>String(v).includes(',')?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');const ts=new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);a.href=URL.createObjectURL(blob);a.download=`${s.session.name}_${ts}.csv`;document.body.appendChild(a);a.click();a.remove();};
+document.getElementById('exportBtn').onclick=()=>{
+  const s=load();
+  if(!s.session) return;
+
+  const sep = ';'; // change to ',' or '\t' if you prefer
+  const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];
+  for(const m of s.mice){
+    const r=computeStats(m.seq);
+    // keep CSV precision here (3 decimals)
+    rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, r.ratio.toFixed(3), m.seq.join('')]);
+  }
+
+  function escapeCell(v){
+    const str = v == null ? '' : String(v);
+    // escape if contains quote, newline or the separator
+    if (new RegExp(`[;"\\n\\r${sep.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}]`).test(str)) return '"' + str.replace(/"/g, '""') + '"';
+    return str;
+  }
+
+  // Excel-friendly header + semicolon-separated values + UTF-8 BOM
+  const sepLine = `sep=${sep}`;
+  const csv = sepLine + '\r\n' + rows.map(r => r.map(escapeCell).join(sep)).join('\r\n');
+
+  // Use Excel MIME type to improve recognition when downloading/opening
+  const blob = new Blob(['\uFEFF', csv], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);
+  a.href = URL.createObjectURL(blob);
+  a.download = `${s.session.name}_${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
 
 
 // --- Service worker ---
