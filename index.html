@@ -54,6 +54,10 @@
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .panel .row + .row{margin-top:4px}
 
+    .alert{padding:12px 16px;border-radius:12px;font-weight:600;display:flex;align-items:center;gap:8px;border:1px solid transparent}
+    .alert-error{background:#fee2e2;border-color:#fecaca;color:#7f1d1d}
+    .alert-success{background:#dcfce7;border-color:#bbf7d0;color:#14532d}
+
     .btn{
       display:inline-flex;
       align-items:center;
@@ -112,11 +116,15 @@
     .btn-undo{background:var(--btnUndo)}
 
     .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
-    .timer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .timer{display:flex;flex-direction:column;gap:12px;width:100%}
+    .timer-left{display:flex;flex-direction:column;gap:10px;width:100%}
+    .timer-main{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;}
     .timer label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}
+    .timer-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .timer-actions .btn{min-width:88px}
     .timer .time{font-weight:900;font-size:1.4rem;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
 
-    .zoom-controls{display:flex;gap:8px;align-items:center;margin-left:auto}
+    .zoom-controls{display:flex;gap:8px;align-items:center;margin-left:0;flex-wrap:wrap}
     .zoom-controls .btn{
       --zoom-btn-size:38px;
       min-width:var(--zoom-btn-size);
@@ -144,18 +152,29 @@
     @media (max-width:720px){
       .panel{padding:14px}
       .row{flex-direction:column;align-items:stretch}
-      .timer{width:100%}
-      .zoom-controls{margin-left:0;justify-content:flex-start}
+      .zoom-controls{justify-content:flex-start}
       .zoom-controls .btn{--zoom-btn-size:36px}
       input[type=text]{width:100%}
       header h1{text-align:center}
       header .sub{text-align:center}
+    }
+    @media (min-width:720px){
+      .timer{flex-direction:row;align-items:center;justify-content:space-between}
+      .timer-left{flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;width:auto}
+      .timer-actions{gap:10px}
+      .zoom-controls{margin-left:auto;display:flex;flex-wrap:nowrap}
     }
     @media (max-width:540px){
       .grid{grid-template-columns:1fr}
       .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
       .timer .time{font-size:1.1rem;padding:6px 10px}
       .seq{font-size:1.05rem;line-height:24px}
+      .timer-main{flex-direction:column;align-items:flex-start;gap:8px}
+      .timer-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+      .timer-actions .btn{min-width:0}
+      .zoom-controls{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:4px}
+      .zoom-controls .btn{width:100%;min-width:0;height:44px}
+      .zoom-value{display:flex;align-items:center;justify-content:center;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:0 8px;font-weight:700}
     }
   </style>
 </head>
@@ -166,6 +185,8 @@
       <h1>Y-Maze Tracker</h1>
       <div class="sub">Enregistre les entrées de bras pour plusieurs sujets en temps réel.</div>
     </header>
+
+    <div id="feedback" class="alert alert-error hidden" role="alert"></div>
 
     <section id="sessionCreate" class="panel">
       <div class="row">
@@ -180,11 +201,17 @@
         <div id="sessionInfo" class="session-badge"></div>
         <div class="grow"></div>
         <div class="timer">
-          <span class="time" id="timerDisplay">08:00</span>
-          <label>Durée (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
-          <button id="timerPlay" class="btn btn-primary">Play</button>
-          <button id="timerPause" class="btn btn-text">Pause</button>
-          <button id="timerReset" class="btn btn-text">Reset</button>
+          <div class="timer-left">
+            <div class="timer-main">
+              <span class="time" id="timerDisplay">08:00</span>
+              <label>Durée (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
+            </div>
+            <div class="timer-actions">
+              <button id="timerPlay" class="btn btn-primary">Play</button>
+              <button id="timerPause" class="btn btn-text">Pause</button>
+              <button id="timerReset" class="btn btn-text">Reset</button>
+            </div>
+          </div>
           <div class="zoom-controls" role="group" aria-label="Contrôles de zoom">
             <button id="zoomOut" class="btn" title="Dézoomer">−</button>
             <span id="zoomValue" class="zoom-value">100%</span>
@@ -208,8 +235,12 @@
 <script>
 // --- Storage ---
 const KEY='ymaze.v4';
+const SESSION_NAMES_KEY='ymaze.sessionNames';
 const load=()=>JSON.parse(localStorage.getItem(KEY)||'{}');
 const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
+const loadSessionNames=()=>{try{return JSON.parse(localStorage.getItem(SESSION_NAMES_KEY)||'[]');}catch(e){return[];}};
+const storeSessionNames=names=>localStorage.setItem(SESSION_NAMES_KEY,JSON.stringify(names));
+const rememberSessionName=name=>{const names=loadSessionNames();if(!names.includes(name)){names.push(name);storeSessionNames(names);}};
 function newState(name){const m=8;return{session:{name,startedAt:new Date().toISOString()},mice:[],timer:{duration:m*60,remaining:m*60,running:false,last:null},uiZoom:1};}
 function newMouse(id){return{id,seq:['C']};}
 
@@ -223,8 +254,11 @@ function computeStats(seq){
 }
 
 // --- UI helpers ---
-const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes');
-function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}}
+const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes'),feedbackEl=document.getElementById('feedback');
+let feedbackTimeout=null;
+function hideMessage(){if(!feedbackEl)return;clearTimeout(feedbackTimeout);feedbackEl.classList.add('hidden');}
+function showMessage(message,type='error'){if(!feedbackEl)return;feedbackEl.textContent=message;feedbackEl.classList.remove('hidden','alert-error','alert-success');feedbackEl.classList.add(type==='success'?'alert-success':'alert-error');clearTimeout(feedbackTimeout);feedbackTimeout=setTimeout(()=>feedbackEl.classList.add('hidden'),4000);}
+function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}hideMessage();}
 function applyZoomFromState(){const s=load();const z=(s && s.uiZoom)?s.uiZoom:1;document.documentElement.style.setProperty('--zoom',z);const valueEl=document.getElementById('zoomValue');if(valueEl){valueEl.textContent=`${Math.round(z*100)}%`;}}
 function formatTime(sec){const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');return `${mm}:${ss}`;}
 
@@ -276,12 +310,37 @@ function render(){
 }
 
 // --- Session actions ---
-document.getElementById('createSession').onclick=()=>{const n=document.getElementById('sessionName').value.trim();if(!n)return;save(newState(n));document.getElementById('sessionName').value='';render();};
+document.getElementById('createSession').onclick=()=>{
+  const input=document.getElementById('sessionName');
+  if(!input)return;
+  const name=input.value.trim();
+  if(!name){showMessage('Veuillez saisir un nom de session.');input.focus();return;}
+  const existingNames=loadSessionNames();
+  if(existingNames.includes(name)){showMessage('Ce nom de session existe déjà.');input.focus();return;}
+  save(newState(name));
+  rememberSessionName(name);
+  input.value='';
+  hideMessage();
+  render();
+};
 document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
 
 // --- Mice actions ---
-document.getElementById('addBtn').onclick=()=>{const i=document.getElementById('mouseInput');const id=i.value.trim();if(!id)return;const s=load();if(!s.session)return;if(s.mice.some(m=>m.id===id)){i.value='';return;}const m=newMouse(id);s.mice.push(m);save(s);i.value='';// append single card (no full re-render)
-cardsEl.appendChild(createCardElement(m));};
+document.getElementById('addBtn').onclick=()=>{
+  const input=document.getElementById('mouseInput');
+  if(!input)return;
+  const id=input.value.trim();
+  if(!id){showMessage('Veuillez saisir un identifiant pour la souris.');input.focus();return;}
+  const s=load();
+  if(!s.session)return;
+  if(s.mice.some(m=>m.id===id)){showMessage(`L'identifiant "${id}" est déjà utilisé dans cette session.`);input.focus();return;}
+  const m=newMouse(id);
+  s.mice.push(m);
+  save(s);
+  input.value='';
+  hideMessage();
+  cardsEl.appendChild(createCardElement(m));
+};
 document.getElementById('mouseInput').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addBtn').click();};
 
 // Efficient event delegation using pointer events (faster on mobile). Works with role=button divs.
@@ -326,12 +385,16 @@ function handleCardActionEvent(target){
   }
 }
 
-// pointerdown fires immediately on touch/pen/mouse -> faster than click on some devices
-cardsEl.addEventListener('pointerdown', e=>{
-  // ignore non-primary buttons
-  if(e.button && e.button !== 0) return;
-  handleCardActionEvent(e.target);
-});
+const supportsPointerEvents = 'PointerEvent' in window;
+if(supportsPointerEvents){
+  cardsEl.addEventListener('pointerdown', e=>{
+    if(e.button && e.button !== 0) return;
+    handleCardActionEvent(e.target);
+    if(e.pointerType === 'touch') e.preventDefault();
+  });
+} else {
+  cardsEl.addEventListener('click', e=>handleCardActionEvent(e.target));
+}
 // keyboard support for accessible div buttons
 cardsEl.addEventListener('keydown', e=>{
   if(e.key === 'Enter' || e.key === ' '){
@@ -339,8 +402,6 @@ cardsEl.addEventListener('keydown', e=>{
     handleCardActionEvent(e.target);
   }
 });
-// also fallback for mouse clicks (desktop)
-cardsEl.addEventListener('click', e=>handleCardActionEvent(e.target));
 
 // --- Timer ---
 let rafId=null;
