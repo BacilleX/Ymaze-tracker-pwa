@@ -117,18 +117,19 @@
 
     .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
     .timer{display:flex;flex-direction:column;gap:12px;width:100%}
-    .timer-left{display:flex;flex-direction:column;gap:10px;width:100%}
-    .timer-main{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;}
+    .timer-left{display:flex;flex-direction:column;gap:12px;width:100%}
+    .timer-main{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%}
+    .timer-main label{width:100%}
     .timer label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}
-    .timer-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .timer-actions .btn{min-width:88px}
+    .timer-actions{display:flex;gap:8px;width:100%}
+    .timer-actions .btn{flex:1;min-width:0}
     .timer .time{font-weight:900;font-size:1.4rem;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
 
-    .zoom-controls{display:flex;gap:8px;align-items:center;margin-left:0;flex-wrap:wrap}
+    .zoom-controls{display:flex;gap:8px;align-items:center;margin-left:0;width:100%}
     .zoom-controls .btn{
-      --zoom-btn-size:38px;
-      min-width:var(--zoom-btn-size);
-      height:var(--zoom-btn-size);
+      flex:1;
+      min-width:0;
+      height:44px;
       padding:0;
       font-size:1.1rem;
       font-weight:700;
@@ -139,7 +140,7 @@
     }
     .zoom-controls .btn:active{transform:translateY(1px)}
     #zoomReset{font-size:1rem}
-    .zoom-value{font-weight:700;font-size:0.9rem;color:var(--muted);min-width:52px;text-align:center}
+    .zoom-value{flex:1;min-width:0;height:44px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;color:var(--muted);background:#f8fafc;border:1px solid var(--border);border-radius:12px}
 
     .hidden{display:none}
     .session-badge{font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;font-size:0.85rem}
@@ -152,8 +153,6 @@
     @media (max-width:720px){
       .panel{padding:14px}
       .row{flex-direction:column;align-items:stretch}
-      .zoom-controls{justify-content:flex-start}
-      .zoom-controls .btn{--zoom-btn-size:36px}
       input[type=text]{width:100%}
       header h1{text-align:center}
       header .sub{text-align:center}
@@ -161,20 +160,31 @@
     @media (min-width:720px){
       .timer{flex-direction:row;align-items:center;justify-content:space-between}
       .timer-left{flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;width:auto}
-      .timer-actions{gap:10px}
-      .zoom-controls{margin-left:auto;display:flex;flex-wrap:nowrap}
+      .timer-main{flex-direction:row;align-items:center;gap:12px;width:auto}
+      .timer-actions{gap:10px;width:auto}
+      .timer-actions .btn{flex:none;min-width:88px}
+      .zoom-controls{width:auto;margin-left:auto;flex-wrap:nowrap}
+      .zoom-controls .btn{
+        --zoom-btn-size:38px;
+        flex:none;
+        width:var(--zoom-btn-size);
+        min-width:var(--zoom-btn-size);
+        height:var(--zoom-btn-size);
+      }
+      .zoom-value{
+        flex:none;
+        min-width:52px;
+        height:auto;
+        padding:0 12px;
+        background:transparent;
+        border:0;
+      }
     }
     @media (max-width:540px){
       .grid{grid-template-columns:1fr}
       .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
       .timer .time{font-size:1.1rem;padding:6px 10px}
       .seq{font-size:1.05rem;line-height:24px}
-      .timer-main{flex-direction:column;align-items:flex-start;gap:8px}
-      .timer-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
-      .timer-actions .btn{min-width:0}
-      .zoom-controls{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:4px}
-      .zoom-controls .btn{width:100%;min-width:0;height:44px}
-      .zoom-value{display:flex;align-items:center;justify-content:center;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:0 8px;font-weight:700}
     }
   </style>
 </head>
@@ -257,7 +267,15 @@ function computeStats(seq){
 const sessionCreate=document.getElementById('sessionCreate'),sessionControls=document.getElementById('sessionControls'),sessionInfo=document.getElementById('sessionInfo'),cardsEl=document.getElementById('cards'),timerDisplay=document.getElementById('timerDisplay'),timerMinutes=document.getElementById('timerMinutes'),feedbackEl=document.getElementById('feedback');
 let feedbackTimeout=null;
 function hideMessage(){if(!feedbackEl)return;clearTimeout(feedbackTimeout);feedbackEl.classList.add('hidden');}
-function showMessage(message,type='error'){if(!feedbackEl)return;feedbackEl.textContent=message;feedbackEl.classList.remove('hidden','alert-error','alert-success');feedbackEl.classList.add(type==='success'?'alert-success':'alert-error');clearTimeout(feedbackTimeout);feedbackTimeout=setTimeout(()=>feedbackEl.classList.add('hidden'),4000);}
+function showMessage(message,type='error'){
+  if(!feedbackEl)return;
+  feedbackEl.textContent=message;
+  feedbackEl.classList.remove('hidden','alert-error','alert-success');
+  feedbackEl.classList.add(type==='success'?'alert-success':'alert-error');
+  if(feedbackEl.scrollIntoView){feedbackEl.scrollIntoView({behavior:'smooth',block:'start'});}
+  clearTimeout(feedbackTimeout);
+  feedbackTimeout=setTimeout(()=>feedbackEl.classList.add('hidden'),4000);
+}
 function setView(){const s=load();if(!s.session){sessionCreate.classList.remove('hidden');sessionControls.classList.add('hidden');cardsEl.innerHTML='';}else{sessionCreate.classList.add('hidden');sessionControls.classList.remove('hidden');sessionInfo.textContent='Session: '+s.session.name;}hideMessage();}
 function applyZoomFromState(){const s=load();const z=(s && s.uiZoom)?s.uiZoom:1;document.documentElement.style.setProperty('--zoom',z);const valueEl=document.getElementById('zoomValue');if(valueEl){valueEl.textContent=`${Math.round(z*100)}%`;}}
 function formatTime(sec){const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');return `${mm}:${ss}`;}
