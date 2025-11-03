@@ -18,6 +18,7 @@ You are free to use, modify, and distribute this code under the terms of the inc
 
 ## Installation on mobile
 
+
 This app can be **installed on your smartphone** as a Progressive Web App (PWA).
 To install it:
 
