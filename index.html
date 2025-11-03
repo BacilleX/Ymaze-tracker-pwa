@@ -254,6 +254,7 @@ document.getElementById('zoomReset').onclick=()=>{setZoom(1);};
 // --- CSV Export ---
 document.getElementById('exportBtn').onclick=()=>{const s=load();if(!s.session)return;const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];for(const m of s.mice){const r=computeStats(m.seq);rows.push([s.session.name,s.session.startedAt,m.id,r.entries,r.alters,r.ratio.toFixed(3),m.seq.join('')]);}const csv=rows.map(r=>r.map(v=>String(v).includes(',')?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');const ts=new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);a.href=URL.createObjectURL(blob);a.download=`${s.session.name}_${ts}.csv`;document.body.appendChild(a);a.click();a.remove();};
 
+
 // --- Service worker ---
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}
 applyZoomFromState();
