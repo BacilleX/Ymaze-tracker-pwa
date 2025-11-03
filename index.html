@@ -337,6 +337,7 @@ function toggleRenameForm(show){
 // Create a single card element for a mouse
 function createCardElement(m){
   const {entries,alters,ratio}=computeStats(m.seq);
+  const displayRatio = Math.round(ratio); // show integer percent in the UI
   const c=document.createElement('article');c.className='card';
   c.innerHTML = `<header><div class="mouse-id">M: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
     <div class="seq">${m.seq.join(' ')}</div>
@@ -344,7 +345,7 @@ function createCardElement(m){
     <div class="stats">
       <div class="stat"><div class="label">Entrées</div><div class="value">${entries}</div></div>
       <div class="stat"><div class="label">Alters.</div><div class="value">${alters}</div></div>
-      <div class="stat"><div class="label">Ratio %</div><div class="value">${ratio.toFixed(3)}</div></div>
+      <div class="stat"><div class="label">Ratio %</div><div class="value">${displayRatio}</div></div>
     </div>
     <div class="actions">
       <div role="button" tabindex="0" class="btn btn-a" data-letter="A" data-id="${m.id}">A</div>
@@ -363,7 +364,7 @@ function updateCardElement(cardEl, m){
   if(vals && vals.length>=3){
     vals[0].textContent = stats.entries;
     vals[1].textContent = stats.alters;
-    vals[2].textContent = stats.ratio.toFixed(3);
+    vals[2].textContent = Math.round(stats.ratio); // integer percent in the UI
   }
 }
 
