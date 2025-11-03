@@ -505,7 +505,26 @@ cardsEl.addEventListener('keydown', e=>{
 
 // --- Timer ---
 let rafId=null;
-function tick(){const s=load();if(!s.timer.running)return;const now=Date.now();const last=s.timer.last||now;const dt=Math.floor((now-last)/1000);if(dt>0){s.timer.remaining=Math.max(0,s.timer.remaining-dt);s.timer.last=now;if(s.timer.remaining===0){s.timer.running=false;s.timer.last=null;}save(s);timerDisplay.textContent=formatTime(s.timer.remaining);}rafId=requestAnimationFrame(tick);}
+function tick(){
+  const s = load();
+  if(!s.timer.running) return;
+  const now = Date.now();
+  const last = s.timer.last || now;
+  const dt = Math.floor((now - last) / 1000);
+  if(dt > 0){
+    s.timer.remaining = Math.max(0, s.timer.remaining - dt);
+    s.timer.last = now;
+    if(s.timer.remaining === 0){
+      s.timer.running = false;
+      s.timer.last = null;
+      // Affiche un message quand le timer arrive à 0
+      showMessage('Le temps est écoulé', 'success');
+    }
+    save(s);
+    timerDisplay.textContent = formatTime(s.timer.remaining);
+  }
+  rafId = requestAnimationFrame(tick);
+}
 document.getElementById('timerPlay').onclick=()=>{const s=load();if(!s.session)return;if(!s.timer.running){s.timer.running=true;s.timer.last=Date.now();save(s);if(!rafId)rafId=requestAnimationFrame(tick);} };
 document.getElementById('timerPause').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;save(s);if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
 document.getElementById('timerReset').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;s.timer.remaining=s.timer.duration;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
