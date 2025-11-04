@@ -4,6 +4,8 @@ Y‑Maze Tracker is a Progressive Web App (PWA) for recording Y‑maze arm entri
 
 Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa/
 
+**Quick start:** Open the link above once on the tablet/phone or laptop you bring into the Y‑maze room while you still have connectivity. The app stores itself locally, so from then on you only need to reopen the same URL—even with no network—to run sessions and access past data.
+
 ## Overview
 - **Who it’s for:** Labs and researchers that still log Y‑maze arm passages manually and don’t have automated tracking or reliable video capture.
 - **What it provides:** A mobile-friendly interface to enter A/B/C choices, per-subject stats, an adjustable timer, and an Excel‑ready export.
@@ -26,7 +28,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 ![CSV export sample](assets/csv-export.png)
 
 ## Workflow
-1. Open the app (or install it via the browser’s PWA prompt).
+1. Before the experiment day, visit the website once on the device you will use; this caches the app so you can simply reopen the same URL later even if the building Wi‑Fi is unavailable.
 2. Enter a session name and press **Create**.
 3. Add subject IDs, then use the A / B / C controls to record entries; **Undo** removes the most recent entry.
 4. Start the session timer with **Play**. When it reaches zero, a modal appears and temporarily blocks the UI.
@@ -42,7 +44,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 - Output is Excel-friendly thanks to the semicolon separator, `sep=;` header, and UTF‑8 BOM. If Excel still shows a single column, import the file and specify semicolon as the delimiter.
 
 ## Usage Statistics
-The app uses [GoatCounter](https://www.goatcounter.com/) for privacy-friendly analytics to monitor usage patterns. No personal data is collected. Public stats are available at https://ymaze.goatcounter.com
+The app uses [GoatCounter](https://www.goatcounter.com/) for privacy-friendly analytics to monitor usage patterns. No personal data is collected. Public stats are available at https://ymaze-tracker-pwa.goatcounter.com
 
 ## Contributing
 Contributions are welcome. Open issues or pull requests for bug fixes, UX improvements, additional stats, CSV tweaks, or multi-user ideas—the project is intentionally simple and community-driven.
