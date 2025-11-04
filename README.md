@@ -22,6 +22,9 @@ You are free to use, modify, and distribute this code under the terms of the inc
 This app can be **installed on your smartphone** as a Progressive Web App (PWA).
 To install it:
 
+
+you also can just open the website once in your mobile device and until you remove your history and cookies the site will remain accessible offline
+
 1. Open the website in your mobile browser.
 2. Tap the **Share** button (or menu icon).
 3. Choose **“Add to Home Screen”**.
