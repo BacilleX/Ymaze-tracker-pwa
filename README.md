@@ -1,11 +1,8 @@
 # Y‑Maze Tracker
 
-Web Progressive App to record Y‑Maze arm entries (A, B, C) per subject, compute alternation metrics, run timed sessions and export results for analysis.
+Web Progressive App (PWA - a website that works like a native app, can be installed locally and used offline) to record Y‑Maze arm entries (A, B, C) per subject, compute alternation metrics, run timed sessions and export results for analysis.
 
 Live demo / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa/
-
-## What is a PWA?
-A Progressive Web App (PWA) is a website that can be installed like a native app on your device. It works offline, can be accessed from your home screen, and doesn't require downloading from an app store. Think of it as a website that behaves like a regular installed application.
 
 ## Summary
 Y‑Maze Tracker is a lightweight, offline-capable web app designed to help labs and researchers record mouse arm entries in Y‑maze tests without needing video recording. It provides a simple interface to log A/B/C entries per subject, an adjustable session timer, per-subject stats and an Excel‑friendly CSV export.
