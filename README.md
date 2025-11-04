@@ -21,11 +21,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 
 ## Screenshots
 
-![Home screen](assets/home-screen.png)
-
-![Per-subject cards](assets/cards-overview.png)
-
-![CSV export sample](assets/csv-export.png)
+![Home screen](assets/1.png)
 
 ## Workflow
 1. Before the experiment day, visit the website once on the device you will use; this caches the app so you can simply reopen the same URL later even if the building Wi‑Fi is unavailable.
