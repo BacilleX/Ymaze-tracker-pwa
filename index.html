@@ -349,11 +349,6 @@ function computeStats(seq) {
     return { entries, alters, ratio };
 }
 
-function calculateRatio(goodAlternations, totalEntries) {
-    if (totalEntries <= 2) return 0;
-    return (goodAlternations / (totalEntries - 2)) * 100;
-}
-
 function formatRatio(value) {
     return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
 }
