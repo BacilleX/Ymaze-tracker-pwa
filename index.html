@@ -350,7 +350,7 @@
 
   <footer>
     <div class="footer-content">
-      <p>Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">BacilleX</a></p>
+      <p>Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">Alexis Chaussy</a></p>
     </div>
   </footer>
 
@@ -367,13 +367,18 @@ function newState(name){const m=8;return{session:{name,startedAt:new Date().toIS
 function newMouse(id){return{id,seq:['C']};}
 
 // --- Stats ---
-function computeStats(seq){
-  const entries=Math.max(0,seq.length-1);
-  let alters=0;for(let i=1;i+2<seq.length;i++){const[x,y,z]=[seq[i],seq[i+1],seq[i+2]];if(x!==y&&y!==z&&x!==z)alters++;}
-  const denom=Math.max(0,entries-2);
-  const ratio=denom>0?(alters/denom*100):0;
-  return{entries,alters,ratio:Math.round(ratio*1000)/1000};
+function computeStats(seq) {
+    const entries = Math.max(0, seq.length - 1);
+    let alters = 0;
+    for (let i = 1; i + 2 < seq.length; i++) {
+        const [x, y, z] = [seq[i], seq[i + 1], seq[i + 2]];
+        if (x !== y && y !== z && x !== z) alters++;
+    }
+    const denom = Math.max(0, entries - 2);
+    const ratio = denom > 0 ? (alters / denom * 100) : 0;
+    return { entries, alters, ratio: ratio.toFixed(2) }; // Format to 2 decimal places
 }
+
 // Function to calculate the ratio with two decimal places
 function calculateRatio(goodAlternations, totalEntries) {
     if (totalEntries <= 2) return 0; // Avoid division by zero
@@ -716,39 +721,39 @@ document.getElementById('zoomOut').onclick=()=>{const s=load();setZoom((s.uiZoom
 document.getElementById('zoomReset').onclick=()=>{setZoom(1);};
 
 // --- CSV Export ---
-document.getElementById('exportBtn').onclick=()=>{
-  const s=load();
-  if(!s.session) return;
+document.getElementById('exportBtn').onclick = () => {
+    const s = load();
+    if (!s.session) return;
 
-  const sep = ';'; // change to ',' or '\t' if you prefer
-  const rows=[['session','startedAt','mouse_id','entries','alternances','ratio_percent','sequence']];
-  for(const m of s.mice){
-    const r=computeStats(m.seq);
-    // keep CSV precision here (3 decimals)
-    rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, r.ratio.toFixed(3), m.seq.join('')]);
-  }
+    const sep = ';'; // change to ',' or '\t' if you prefer
+    const rows = [['session', 'startedAt', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
+    for (const m of s.mice) {
+        const r = computeStats(m.seq);
+        // keep CSV precision here (2 decimals)
+        rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, r.ratio, m.seq.join('')]);
+    }
 
-  function escapeCell(v){
-    const str = v == null ? '' : String(v);
-    // escape if contains quote, newline or the separator
-    if (new RegExp(`[;"\\n\\r${sep.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}]`).test(str)) return '"' + str.replace(/"/g, '""') + '"';
-    return str;
-  }
+    function escapeCell(v) {
+        const str = v == null ? '' : String(v);
+        // escape if contains quote, newline or the separator
+        if (new RegExp(`[;"\\n\\r${sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}]`).test(str)) return '"' + str.replace(/"/g, '""') + '"';
+        return str;
+    }
 
-  // Excel-friendly header + semicolon-separated values + UTF-8 BOM
-  const sepLine = `sep=${sep}`;
-  const csv = sepLine + '\r\n' + rows.map(r => r.map(escapeCell).join(sep)).join('\r\n');
+    // Excel-friendly header + semicolon-separated values + UTF-8 BOM
+    const sepLine = `sep=${sep}`;
+    const csv = sepLine + '\r\n' + rows.map(r => r.map(escapeCell).join(sep)).join('\r\n');
 
-  // Use Excel MIME type to improve recognition when downloading/opening
-  const blob = new Blob(['\uFEFF', csv], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    // Use Excel MIME type to improve recognition when downloading/opening
+    const blob = new Blob(['\uFEFF', csv], { type: 'application/vnd.ms-excel;charset=utf-8;' });
 
-  const a = document.createElement('a');
-  const ts = new Date().toISOString().replace(/[:T]/g,'-').slice(0,16);
-  a.href = URL.createObjectURL(blob);
-  a.download = `${s.session.name}_${ts}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
+    a.href = URL.createObjectURL(blob);
+    a.download = `${s.session.name}_${ts}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 };
 
 
