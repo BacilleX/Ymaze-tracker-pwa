@@ -381,13 +381,16 @@ function computeStats(seq) {
     }
     const denom = Math.max(0, entries - 2);
     const ratio = denom > 0 ? (alters / denom * 100) : 0;
-    return { entries, alters, ratio: ratio.toFixed(2) }; // Ensure ratio is formatted to 2 decimal places
+    return { entries, alters, ratio };
 }
 
-// Function to calculate the ratio with two decimal places
 function calculateRatio(goodAlternations, totalEntries) {
-    if (totalEntries <= 2) return 0; // Avoid division by zero
-    return ((goodAlternations / (totalEntries - 2)) * 100).toFixed(2); // Format to 2 decimal places
+    if (totalEntries <= 2) return 0;
+    return (goodAlternations / (totalEntries - 2)) * 100;
+}
+
+function formatRatio(value) {
+    return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
 }
 
 // --- UI helpers ---
@@ -520,7 +523,7 @@ function toggleRenameForm(show){
 // Create a single card element for a mouse
 function createCardElement(m) {
     const { entries, alters, ratio } = computeStats(m.seq);
-    const displayRatio = (typeof ratio === 'number') ? ratio.toFixed(2) : '0.00'; // Show 2 decimals in the UI
+    const displayRatio = formatRatio(ratio);
     const c = document.createElement('article');
     c.className = 'card';
     c.innerHTML = `<header><div class="mouse-id">Mouse ID: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Delete</button></header>
@@ -548,7 +551,7 @@ function updateCardElement(cardEl, m){
   if(vals && vals.length>=3){
     vals[0].textContent = stats.entries;
     vals[1].textContent = stats.alters;
-    vals[2].textContent = (typeof stats.ratio === 'number') ? stats.ratio.toFixed(1) : '0.0'; // 1 decimal in the UI
+    vals[2].textContent = formatRatio(stats.ratio);
   }
 }
 
@@ -736,7 +739,7 @@ document.getElementById('exportBtn').onclick = () => {
     for (const m of s.mice) {
         const r = computeStats(m.seq);
         // keep CSV precision here (2 decimals)
-        rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, r.ratio, m.seq.join('')]);
+        rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join('')]);
     }
 
     function escapeCell(v) {
