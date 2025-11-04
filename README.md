@@ -12,6 +12,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 - **Why it matters:** It replaces handwritten notes, speeds data collection during live trials, enforces consistent formatting, and reduces transcription errors while keeping everything available offline.
 
 ## Core Features
+- Your data stays on your device
 - Per-subject cards to add/remove subjects, append A/B/C entries, and undo the last input.
 - Automatic metrics: total entries, number of correct alternations, alternation ratio.
 - Session timer with modal alert when the countdown hits zero.
