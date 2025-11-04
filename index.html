@@ -683,7 +683,7 @@ timerMinutes.onchange=()=>{const mins=Math.max(1,parseInt(timerMinutes.value||'8
 // --- Zoom controls ---
 function setZoom(z) {
   const s = load();
-  s.uiZoom = Math.max(0.6, Math.min(1.6, Number(z)));
+  s.uiZoom = Math.max(0.4, Math.min(1.6, Number(z)));
   save(s);
   document.documentElement.style.setProperty('--zoom', s.uiZoom);
   // Update zoom display
