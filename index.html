@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -172,7 +172,13 @@
     .timer-actions .btn{flex:1;min-width:0}
     .timer .time{font-weight:900;font-size:1.4rem;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
 
-    .zoom-controls{display:flex;gap:8px;align-items:center;margin-left:0;width:100%}
+    .zoom-controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-left:0;
+      width:100%
+    }
     .zoom-controls .btn{
       flex:1;
       min-width:0;
@@ -188,6 +194,11 @@
     .zoom-controls .btn:active{transform:translateY(1px)}
     #zoomReset{font-size:1rem}
     .zoom-value{flex:1;min-width:0;height:44px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;color:var(--muted);background:#f8fafc;border:1px solid var(--border);border-radius:12px}
+    .zoom-label{
+      font-weight:600;
+      color:var(--muted);
+      font-size:0.9rem;
+    }
 
     .hidden{display:none}
     .session-badge{font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;font-size:0.85rem}
@@ -214,7 +225,11 @@
       .timer-main{flex-direction:row;align-items:center;gap:12px;width:auto}
       .timer-actions{gap:10px;width:auto}
       .timer-actions .btn{flex:none;min-width:88px}
-      .zoom-controls{width:auto;margin-left:auto;flex-wrap:nowrap}
+      .zoom-controls{
+        width:auto;
+        margin-left:auto;
+        flex-wrap:nowrap
+      }
       .zoom-controls .btn{
         --zoom-btn-size:38px;
         flex:none;
@@ -230,6 +245,9 @@
         background:transparent;
         border:0;
       }
+      .zoom-label{
+        white-space:nowrap;
+      }
     }
     @media (max-width:540px){
       .grid{grid-template-columns:1fr}
@@ -239,29 +257,26 @@
     }
   </style>
     
-    <!-- Simple analytics -->
-    <script data-goatcounter="https://ymaze-tracker-pwa.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <div class="container">
     <header>
       <h1>Y-Maze Tracker</h1>
-      <div class="sub">Enregistre les entrées de bras pour plusieurs sujets en temps réel.</div>
+      <div class="sub">Records arm entries for multiple subjects in real time.</div>
     </header>
 
     <div id="feedback" class="alert alert-error hidden" role="alert"></div>
     <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
     <div id="timerModal" class="modal-overlay hidden" role="status" aria-live="assertive" aria-hidden="true">
-      <div class="modal-content">Le temps est écoulé</div>
+      <div class="modal-content">Time is up</div>
     </div>
 
     <section id="sessionCreate" class="panel">
       <div class="row">
-        <span class="session-badge">Nouvelle session</span>
-        <input id="sessionName" type="text" placeholder="Nom de la session" class="grow">
-        <button id="createSession" class="btn btn-primary">Créer</button>
+        <span class="session-badge">New session</span>
+        <input id="sessionName" type="text" placeholder="Session name" class="grow">
+        <button id="createSession" class="btn btn-primary">Create</button>
       </div>
     </section>
 
@@ -275,7 +290,7 @@
           <div class="timer-left">
             <div class="timer-main">
               <span class="time" id="timerDisplay">08:00</span>
-              <label>Durée (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
+              <label>Duration (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
             </div>
             <div class="timer-actions">
               <button id="timerPlay" class="btn btn-primary">Play</button>
@@ -283,19 +298,20 @@
               <button id="timerReset" class="btn btn-text">Reset</button>
             </div>
           </div>
-          <div class="zoom-controls" role="group" aria-label="Contrôles de zoom">
-            <button id="zoomOut" class="btn" title="Dézoomer">−</button>
+          <div class="zoom-controls" role="group" aria-label="Zoom controls">
+            <span class="zoom-label">Zoom:</span>
+            <button id="zoomOut" class="btn" title="Zoom out">−</button>
             <span id="zoomValue" class="zoom-value">100%</span>
-            <button id="zoomIn" class="btn" title="Zoomer">+</button>
-            <button id="zoomReset" class="btn" title="Réinitialiser le zoom">⟲</button>
+            <button id="zoomIn" class="btn" title="Zoom in">+</button>
+            <button id="zoomReset" class="btn" title="Reset zoom">⟲</button>
           </div>
         </div>
       </div>
       <div class="row">
-        <input id="mouseInput" type="text" placeholder="Entrer l'ID de la souris" class="grow">
-        <button id="addBtn" class="btn btn-primary">Ajouter</button>
+        <input id="mouseInput" type="text" placeholder="Enter mouse ID" class="grow">
+        <button id="addBtn" class="btn btn-primary">Add</button>
         <button id="exportBtn" class="btn btn-export">Export</button>
-        <button id="newSession" class="btn btn-danger">Nouvelle session</button>
+        <button id="newSession" class="btn btn-danger">New session</button>
       </div>
     </section>
 
@@ -456,12 +472,12 @@ function createCardElement(m){
   const {entries,alters,ratio}=computeStats(m.seq);
   const displayRatio = (typeof ratio === 'number') ? ratio.toFixed(1) : '0.0'; // show 1 decimal in the UI
   const c=document.createElement('article');c.className='card';
-  c.innerHTML = `<header><div class="mouse-id">Mouse ID: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Suppr.</button></header>
+  c.innerHTML = `<header><div class="mouse-id">Mouse ID: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Delete</button></header>
     <div class="seq">${m.seq.join(' ')}</div>
-    <div class="section-title">Analyse</div>
+    <div class="section-title">Analysis</div>
     <div class="stats">
-      <div class="stat"><div class="label">Entrées</div><div class="value">${entries}</div></div>
-      <div class="stat"><div class="label">Alters.</div><div class="value">${alters}</div></div>
+      <div class="stat"><div class="label">Entries</div><div class="value">${entries}</div></div>
+      <div class="stat"><div class="label">Altern.</div><div class="value">${alters}</div></div>
       <div class="stat"><div class="label">Ratio %</div><div class="value">${displayRatio}</div></div>
     </div>
     <div class="actions">
@@ -504,9 +520,9 @@ const handleCreateSession=()=>{
   const input=document.getElementById('sessionName');
   if(!input)return;
   const name=input.value.trim();
-  if(!name){showMessage('Veuillez saisir un nom de session.');input.focus();return;}
+  if(!name){showMessage('Please enter a session name.');input.focus();return;}
   const existingNames=loadSessionNames();
-  if(existingNames.includes(name)){showMessage('Ce nom de session existe déjà.');input.focus();return;}
+  if(existingNames.includes(name)){showMessage('This session name already exists.');input.focus();return;}
   save(newState(name));
   rememberSessionName(name);
   input.value='';
@@ -538,17 +554,17 @@ if(sessionRenameBtn)sessionRenameBtn.onclick=()=>{const s=load();if(!s.session)r
 if(sessionRenameCancel)sessionRenameCancel.onclick=()=>toggleRenameForm(false);
 if(sessionRenameSave)sessionRenameSave.onclick=()=>handleRenameSession();
 if(sessionRenameInput)sessionRenameInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleRenameSession();}if(e.key==='Escape'){e.preventDefault();toggleRenameForm(false);}});
-document.getElementById('newSession').onclick=()=>{if(confirm('Créer une nouvelle session ? Les données non exportées seront perdues.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
+document.getElementById('newSession').onclick=()=>{if(confirm('Create new session? Unsaved data will be lost.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
 
 // --- Mice actions ---
 document.getElementById('addBtn').onclick=()=>{
   const input=document.getElementById('mouseInput');
   if(!input)return;
   const id=input.value.trim();
-  if(!id){showMessage('Veuillez saisir un identifiant pour la souris.');input.focus();return;}
+  if(!id){showMessage('Please enter a mouse ID.');input.focus();return;}
   const s=load();
   if(!s.session)return;
-  if(s.mice.some(m=>m.id===id)){showMessage(`L'identifiant "${id}" est déjà utilisé dans cette session.`);input.focus();return;}
+  if(s.mice.some(m=>m.id===id)){showMessage(`ID "${id}" is already used in this session.`);input.focus();return;}
   const m=newMouse(id);
   s.mice.push(m);
   save(s);
