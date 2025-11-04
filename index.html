@@ -627,6 +627,9 @@ function handleCardActionEvent(target){
   // Trash (delete)
   if(el.classList.contains('trash')){
     const id=el.dataset.id;
+    const mouse = s.mice.find(x=>x.id===id);
+    const confirmMsg = mouse ? `Delete mouse "${mouse.id}"? This removes its entries.` : 'Delete this mouse?';
+    if(!window.confirm(confirmMsg)) return;
     s.mice = s.mice.filter(x=>x.id!==id);
     save(s);
     const card = el.closest('.card');
