@@ -122,6 +122,9 @@ This means you can:
 3. Keep all your data locally
 4. Access previous sessions without connection
 
+## Usage Statistics
+This tool uses [GoatCounter](https://www.goatcounter.com/) for basic, privacy-friendly analytics to understand usage patterns and improve the app. No personal data is collected. You can view public stats at: https://ymaze.goatcounter.com
+
 ## Contributing
 Improvements and bug fixes are welcome. Open issues or pull requests on the repository. The project is intentionally simple — if you have ideas (UX improvements, CSV formats, additional stats, multi-user sync), please contribute.
 
