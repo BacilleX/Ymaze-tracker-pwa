@@ -290,67 +290,72 @@
 <body>
   <div class="app-shell">
     <div class="container">
-    <header>
-      <h1>Y-Maze Tracker</h1>
-      <div class="sub">Records arm entries for multiple subjects in real time.</div>
-    </header>
-
-    <div id="feedback" class="alert alert-error hidden" role="alert"></div>
-    <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
-    <div id="timerModal" class="modal-overlay hidden" role="status" aria-live="assertive" aria-hidden="true">
-      <div class="modal-content">Time is up</div>
-    </div>
-
-    <section id="sessionCreate" class="panel">
-      <div class="row">
-        <span class="session-badge">New session</span>
-        <input id="sessionName" type="text" placeholder="Session name" class="grow">
-        <button id="createSession" class="btn btn-primary">Create</button>
+      <!-- Add GitHub link here -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">BacilleX</a>
       </div>
-    </section>
 
-    <section id="sessionControls" class="panel hidden">
-      <div class="row">
-        <div class="session-name-container">
-          <div id="sessionInfo" class="session-badge"></div>
+      <header>
+        <h1>Y-Maze Tracker</h1>
+        <div class="sub">Records arm entries for multiple subjects in real time.</div>
+      </header>
+
+      <div id="feedback" class="alert alert-error hidden" role="alert"></div>
+      <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
+      <div id="timerModal" class="modal-overlay hidden" role="status" aria-live="assertive" aria-hidden="true">
+        <div class="modal-content">Time is up</div>
+      </div>
+
+      <section id="sessionCreate" class="panel">
+        <div class="row">
+          <span class="session-badge">New session</span>
+          <input id="sessionName" type="text" placeholder="Session name" class="grow">
+          <button id="createSession" class="btn btn-primary">Create</button>
         </div>
-        <div class="grow"></div>
-        <div class="timer">
-          <div class="timer-left">
-            <div class="timer-main">
-              <span class="time" id="timerDisplay">08:00</span>
-              <label>Duration (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
+      </section>
+
+      <section id="sessionControls" class="panel hidden">
+        <div class="row">
+          <div class="session-name-container">
+            <div id="sessionInfo" class="session-badge"></div>
+          </div>
+          <div class="grow"></div>
+          <div class="timer">
+            <div class="timer-left">
+              <div class="timer-main">
+                <span class="time" id="timerDisplay">08:00</span>
+                <label>Duration (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
+              </div>
+              <div class="timer-actions">
+                <button id="timerPlay" class="btn btn-primary">Play</button>
+                <button id="timerPause" class="btn btn-text">Pause</button>
+                <button id="timerReset" class="btn btn-text">Reset</button>
+              </div>
             </div>
-            <div class="timer-actions">
-              <button id="timerPlay" class="btn btn-primary">Play</button>
-              <button id="timerPause" class="btn btn-text">Pause</button>
-              <button id="timerReset" class="btn btn-text">Reset</button>
+            <div class="zoom-controls" role="group" aria-label="Zoom controls">
+              <span class="zoom-label">Zoom:</span>
+              <button id="zoomOut" class="btn" title="Zoom out">−</button>
+              <span id="zoomValue" class="zoom-value">100%</span>
+              <button id="zoomIn" class="btn" title="Zoom in">+</button>
+              <button id="zoomReset" class="btn" title="Reset zoom">⟲</button>
             </div>
           </div>
-          <div class="zoom-controls" role="group" aria-label="Zoom controls">
-            <span class="zoom-label">Zoom:</span>
-            <button id="zoomOut" class="btn" title="Zoom out">−</button>
-            <span id="zoomValue" class="zoom-value">100%</span>
-            <button id="zoomIn" class="btn" title="Zoom in">+</button>
-            <button id="zoomReset" class="btn" title="Reset zoom">⟲</button>
-          </div>
         </div>
-      </div>
-      <div class="row">
-        <input id="mouseInput" type="text" placeholder="Enter mouse ID" class="grow">
-        <button id="addBtn" class="btn btn-primary">Add</button>
-        <button id="exportBtn" class="btn btn-export">Export data</button>
-        <button id="newSession" class="btn btn-danger">New session</button>
-      </div>
-    </section>
+        <div class="row">
+          <input id="mouseInput" type="text" placeholder="Enter mouse ID" class="grow">
+          <button id="addBtn" class="btn btn-primary">Add</button>
+          <button id="exportBtn" class="btn btn-export">Export data</button>
+          <button id="newSession" class="btn btn-danger">New session</button>
+        </div>
+      </section>
 
-    <section class="grid" id="cards"></section>
+      <section class="grid" id="cards"></section>
     </div>
   </div>
 
   <footer>
     <div class="footer-content">
-      <p>Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">Alexis Chaussy</a></p>
+      <!-- Removed GitHub link from footer -->
     </div>
   </footer>
 
