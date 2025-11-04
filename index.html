@@ -339,6 +339,7 @@ function computeStats(seq){
   const ratio=denom>0?(alters/denom*100):0;
   return{entries,alters,ratio:Math.round(ratio*1000)/1000};
 }
+// Function to calculate the ratio with two decimal places
 function calculateRatio(goodAlternations, totalEntries) {
     if (totalEntries <= 2) return 0; // Avoid division by zero
     return ((goodAlternations / (totalEntries - 2)) * 100).toFixed(2); // Format to 2 decimal places
