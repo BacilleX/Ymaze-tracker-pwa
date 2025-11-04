@@ -45,16 +45,82 @@ CSV columns: `session`, `startedAt`, `mouse_id`, `entries`, `alternances`, `rati
 
 - The export is formatted to be Excel-friendly (semicolon separator and UTF‑8 BOM). If Excel shows a single column, import the file with semicolon as the delimiter.
 
-## Install / Run locally (macOS)
-- Quick: open `index.html` in a browser (service-worker features may be limited when opened as `file://`).
-- Recommended: run a local server so PWA / service worker can register:
-  - Python: `python3 -m http.server 8000` → open `http://localhost:8000`
-  - Node: `http-server` (npm) and open the served URL
+## Installation Options
 
-## Install on mobile (PWA)
+### Web Version (All Platforms)
+Simply visit: https://bacillex.github.io/Ymaze-tracker-pwa/
+
+### Desktop Installation (Local Server)
+
+#### macOS
+1. Download the project
+2. Open Terminal
+3. Navigate to the project folder:
+```bash
+cd path/to/ymaze-tracker-PWA
+```
+4. Start a local server (choose one):
+   - Using Python (pre-installed on macOS):
+     ```bash
+     python3 -m http.server 8000
+     ```
+   - Using Node.js:
+     ```bash
+     npm install -g http-server
+     http-server -c-1
+     ```
+5. Open in your browser:
+   - Python: http://localhost:8000
+   - Node: http://127.0.0.1:8080
+
+#### Windows
+1. Download the project
+2. Open Command Prompt (cmd) or PowerShell
+3. Navigate to the project folder:
+```cmd
+cd C:\path\to\ymaze-tracker-PWA
+```
+4. Start a local server (choose one):
+   - Using Python (needs installation):
+     ```cmd
+     python -m http.server 8000
+     ```
+   - Using Node.js:
+     ```cmd
+     npm install -g http-server
+     http-server -c-1
+     ```
+5. Open in your browser:
+   - Python: http://localhost:8000
+   - Node: http://127.0.0.1:8080
+
+### Quick Test (Not Recommended)
+You can directly open `index.html` in your browser, but:
+- Service worker features will be limited
+- PWA installation won't work
+- Some browsers restrict `file://` access
+
+### Mobile Installation (PWA) & Offline Usage
+#### Mobile Install
 - Open the site in your mobile browser.
-- Use the browser menu → “Add to Home Screen” (or Install).
-- After first load the app works offline until site data is cleared.
+- Use the browser menu → "Add to Home Screen" (or Install).
+- The app will appear as an icon on your home screen.
+
+#### Offline Availability
+- Simply visiting the website once on your device (mobile or desktop) makes it available offline
+- All data is stored locally in your browser
+- Sessions and settings persist between visits
+- The app remains fully functional without internet until you:
+  - Clear your browser history
+  - Delete cookies/site data
+  - Clear browser cache
+  - Uninstall the PWA
+
+This means you can:
+1. Load the site once with internet
+2. Use it completely offline afterwards
+3. Keep all your data locally
+4. Access previous sessions without connection
 
 ## Contributing
 Improvements and bug fixes are welcome. Open issues or pull requests on the repository. The project is intentionally simple — if you have ideas (UX improvements, CSV formats, additional stats, multi-user sync), please contribute.
