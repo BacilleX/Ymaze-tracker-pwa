@@ -275,6 +275,10 @@
       </header>
 
       <div id="feedback" class="alert alert-error hidden" role="alert"></div>
+      <div id="updateBanner" class="alert alert-success hidden" role="status" aria-live="polite">
+        <span>Une nouvelle version est disponible. Veuillez recharger la page pour l'appliquer.</span>
+        <button id="updateReload" class="btn btn-primary">Recharger la page</button>
+      </div>
       <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
       <div id="timerModal" class="modal-overlay hidden" role="status" aria-live="assertive" aria-hidden="true">
         <div class="modal-content">Time is up</div>
@@ -368,7 +372,9 @@ sessionRenameCancel=document.getElementById('sessionRenameCancel'),
 cardsEl=document.getElementById('cards'),
 timerDisplay=document.getElementById('timerDisplay'),
 timerMinutes=document.getElementById('timerMinutes'),
-feedbackEl=document.getElementById('feedback');
+feedbackEl=document.getElementById('feedback'),
+updateBanner=document.getElementById('updateBanner'),
+updateReloadBtn=document.getElementById('updateReload');
 let feedbackTimeout=null;
 function hideMessage(){if(!feedbackEl)return;clearTimeout(feedbackTimeout);feedbackEl.classList.add('hidden');}
 function showMessage(message,type='error'){
@@ -736,11 +742,18 @@ let _reloadingForUpdate=false;
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message',event=>{
     if(event.data && event.data.type==='NEW_VERSION_AVAILABLE' && !_reloadingForUpdate){
-      _reloadingForUpdate=true;
-      window.location.reload();
+      if(updateBanner) updateBanner.classList.remove('hidden');
     }
   });
   window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
+}
+if(updateReloadBtn){
+  updateReloadBtn.addEventListener('click',()=>{
+    if(_reloadingForUpdate) return;
+    _reloadingForUpdate=true;
+    updateReloadBtn.disabled=true;
+    window.location.reload();
+  });
 }
 applyZoomFromState();
 render();
