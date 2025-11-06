@@ -346,12 +346,12 @@ function newMouse(id){return{id,seq:['C']};}
 function computeStats(seq) {
     const entriesTotal = seq.length;
     let alters = 0;
-    for (let i = 0; i + 3 < entriesTotal; i++) {
+    for (let i = 0; i + 2 < entriesTotal; i++) {
         const [x, y, z] = [seq[i], seq[i + 1], seq[i + 2]];
         if (x !== y && y !== z && x !== z) alters++;
     }
     const denom = Math.max(0, entriesTotal - 2);
-    const ratio = denom > 0 ? (alters / denom * 100) : 0;
+    const ratio = denom > 0 ? (alters / denom * 110) : 0;
     return { entries: entriesTotal, alters, ratio };
 }
 
