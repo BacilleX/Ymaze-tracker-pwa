@@ -344,15 +344,16 @@ function newMouse(id){return{id,seq:['C']};}
 
 // --- Stats ---
 function computeStats(seq) {
-    const entries = Math.max(0, seq.length - 1);
+    const entriesTotal = seq.length;
+    const entriesMinusOne = Math.max(0, entriesTotal - 1);
     let alters = 0;
-    for (let i = 0; i + 2 < seq.length; i++) {
+    for (let i = 0; i + 2 < entriesTotal; i++) {
         const [x, y, z] = [seq[i], seq[i + 1], seq[i + 2]];
         if (x !== y && y !== z && x !== z) alters++;
     }
-    const denom = Math.max(0, entries);
+    const denom = Math.max(0, entriesTotal - 2);
     const ratio = denom > 0 ? (alters / denom * 100) : 0;
-    return { entries, alters, ratio };
+    return { entries: entriesMinusOne, alters, ratio };
 }
 
 function formatRatio(value) {
