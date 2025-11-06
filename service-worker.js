@@ -1,4 +1,4 @@
-const CACHE='ymaze-v6';
+const CACHE='ymaze-v7';
 const ASSETS=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 
 function notifyClientsAboutUpdate(){
