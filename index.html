@@ -576,7 +576,19 @@ if(sessionRenameBtn)sessionRenameBtn.onclick=()=>{const s=load();if(!s.session)r
 if(sessionRenameCancel)sessionRenameCancel.onclick=()=>toggleRenameForm(false);
 if(sessionRenameSave)sessionRenameSave.onclick=()=>handleRenameSession();
 if(sessionRenameInput)sessionRenameInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleRenameSession();}if(e.key==='Escape'){e.preventDefault();toggleRenameForm(false);}});
-document.getElementById('newSession').onclick=()=>{if(confirm('Create new session? Unsaved data will be lost.')){localStorage.removeItem(KEY);setView();cardsEl.innerHTML='';}};
+document.getElementById('newSession').onclick=()=>{
+  if(!confirm('Create new session? Unsaved data will be lost.')) return;
+  const state=load();
+  const currentName=state && state.session ? state.session.name : null;
+  if(currentName){
+    const filtered=loadSessionNames().filter(n=>n!==currentName);
+    storeSessionNames(filtered);
+  }
+  localStorage.removeItem(KEY);
+  setView();
+  cardsEl.innerHTML='';
+  hideMessage();
+};
 
 // --- Mice actions ---
 document.getElementById('addBtn').onclick=()=>{
