@@ -346,7 +346,7 @@ function newMouse(id){return{id,seq:['C']};}
 function computeStats(seq) {
     const entriesTotal = seq.length;
     let alters = 0;
-    for (let i = 0; i + 2 < entriesTotal; i++) {
+    for (let i = 0; i + 3 < entriesTotal; i++) {
         const [x, y, z] = [seq[i], seq[i + 1], seq[i + 2]];
         if (x !== y && y !== z && x !== z) alters++;
     }
