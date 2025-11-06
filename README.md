@@ -40,6 +40,9 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
   (If `total_entries <= 2`, the ratio is defined as 0.)
 - Output is Excel-friendly thanks to the semicolon separator, `sep=;` header, and UTF‑8 BOM. If Excel still shows a single column, import the file and specify semicolon as the delimiter.
 
+## Analytics
+You can view public usage statistics for this tool at: https://cloud.umami.is/share/HxvLgrV72K3hK2iQ
+
 ## Contributing
 Contributions are welcome. Open issues or pull requests for bug fixes, UX improvements, additional stats, CSV tweaks, or multi-user ideas—the project is intentionally simple and community-driven.
 
