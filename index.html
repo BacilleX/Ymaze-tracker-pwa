@@ -732,7 +732,16 @@ document.getElementById('exportBtn').onclick = () => {
 
 
 // --- Service worker ---
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));}
+let _reloadingForUpdate=false;
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',event=>{
+    if(event.data && event.data.type==='NEW_VERSION_AVAILABLE' && !_reloadingForUpdate){
+      _reloadingForUpdate=true;
+      window.location.reload();
+    }
+  });
+  window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
+}
 applyZoomFromState();
 render();
 </script>
