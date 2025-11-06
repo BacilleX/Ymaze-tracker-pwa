@@ -351,7 +351,7 @@ function computeStats(seq) {
         if (x !== y && y !== z && x !== z) alters++;
     }
     const denom = Math.max(0, entriesTotal - 2);
-    const ratio = denom > 0 ? (alters / denom * 110) : 0;
+    const ratio = denom > 0 ? (alters / denom * 100) : 0;
     return { entries: entriesTotal, alters, ratio };
 }
 
@@ -766,6 +766,16 @@ async function clearDeviceDataBeforeReload(){
     try{
       const keys=await caches.keys();
       await Promise.all(keys.map(k=>caches.delete(k)));
+    }catch(e){}
+  }
+  if(navigator.storage && navigator.storage.getDirectory){
+    try{
+      const root=await navigator.storage.getDirectory();
+      const removals=[];
+      for await (const [name] of root.entries()){
+        removals.push(root.removeEntry(name,{recursive:true}));
+      }
+      await Promise.all(removals);
     }catch(e){}
   }
   if(window.indexedDB && indexedDB.databases){
