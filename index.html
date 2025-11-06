@@ -351,7 +351,7 @@ function computeStats(seq) {
         if (x !== y && y !== z && x !== z) alters++;
     }
     const denom = Math.max(0, entriesTotal - 2);
-    const ratio = denom > 0 ? (alters / denom * 110) : 0;
+    const ratio = denom > 0 ? (alters / denom * 100) : 0;
     return { entries: entriesTotal, alters, ratio };
 }
 
