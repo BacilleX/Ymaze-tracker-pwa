@@ -276,7 +276,7 @@
 
       <div id="feedback" class="alert alert-error hidden" role="alert"></div>
       <div id="updateBanner" class="alert alert-success hidden" role="status" aria-live="polite">
-        <span>Une nouvelle version est disponible. Veuillez recharger la page pour l'appliquer.</span>
+        <span>Une nouvelle version est disponible. Recharger effacera toutes les données enregistrées sur cet appareil.</span>
         <button id="updateReload" class="btn btn-primary">Recharger la page</button>
       </div>
       <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
@@ -764,6 +764,7 @@ if(updateReloadBtn){
     if(_reloadingForUpdate) return;
     _reloadingForUpdate=true;
     updateReloadBtn.disabled=true;
+    try{localStorage.clear();}catch(e){}
     window.location.reload();
   });
 }
