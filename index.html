@@ -759,12 +759,32 @@ if('serviceWorker' in navigator){
   });
   window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
 }
+async function clearDeviceDataBeforeReload(){
+  try{localStorage.clear();}catch(e){}
+  try{sessionStorage.clear();}catch(e){}
+  if('caches' in window){
+    try{
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }catch(e){}
+  }
+  if(window.indexedDB && indexedDB.databases){
+    try{
+      const dbs=await indexedDB.databases();
+      await Promise.all(dbs.map(db=>db && db.name ? new Promise(res=>{
+        const req=indexedDB.deleteDatabase(db.name);
+        req.onsuccess=req.onerror=req.onblocked=()=>res();
+      }):Promise.resolve()));
+    }catch(e){}
+  }
+}
+
 if(updateReloadBtn){
-  updateReloadBtn.addEventListener('click',()=>{
+  updateReloadBtn.addEventListener('click',async()=>{
     if(_reloadingForUpdate) return;
     _reloadingForUpdate=true;
     updateReloadBtn.disabled=true;
-    try{localStorage.clear();}catch(e){}
+    await clearDeviceDataBeforeReload();
     window.location.reload();
   });
 }

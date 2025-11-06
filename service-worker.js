@@ -1,4 +1,4 @@
-const CACHE='ymaze-tracker-pwa-v0.9-test';
+const CACHE='ymaze-tracker-pwa-v0.9.1-test';
 const ASSETS=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 
 function notifyClientsAboutUpdate(){
