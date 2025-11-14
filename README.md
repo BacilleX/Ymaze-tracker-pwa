@@ -47,4 +47,4 @@ You can view public usage statistics for this tool at: https://cloud.umami.is/sh
 Contributions are welcome. Open issues or pull requests for bug fixes, UX improvements, additional stats, CSV tweaks, or multi-user ideas—the project is intentionally simple and community-driven.
 
 ## License
-This project is distributed under the license found in the `LICENSE` file.
+This project is distributed under the license found in the `LICENSE` file. (GNUv3)
