@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,265 +9,651 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png" sizes="192x192">
   <style>
-    :root{
-      --bg:#f8fafc; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
-      --btnA:#22c55e; --btnB:#3b82f6; --btnC:#6366f1; --btnUndo:#f59e0b;
-      --danger:#ef4444; --primary:#111827;
-      --radius:16px; --shadow:0 10px 20px rgba(2,6,23,0.08);
-      --zoom:1;
+    :root {
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --btnA: #22c55e;
+      --btnB: #3b82f6;
+      --btnC: #6366f1;
+      --btnUndo: #f59e0b;
+      --danger: #ef4444;
+      --primary: #111827;
+      --radius: 16px;
+      --shadow: 0 10px 20px rgba(2, 6, 23, 0.08);
+      --zoom: 1;
     }
+
     /* modal overlay centered */
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(2,6,23,0.45);
-      z-index:1200;
-      padding:20px;
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 23, 0.45);
+      z-index: 1200;
+      padding: 20px;
     }
-    .modal-box{
-      max-width:720px;
-      width:100%;
-      background:var(--card);
-      border-radius:14px;
-      padding:24px;
-      box-shadow:0 20px 40px rgba(2,6,23,0.35);
-      text-align:center;
+
+    .modal-box {
+      max-width: 720px;
+      width: 100%;
+      background: var(--card);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(2, 6, 23, 0.35);
+      text-align: center;
     }
+
     /* timer modal styles (appears above everything and blocks interaction) */
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(2,6,23,0.45);
-      z-index:1200;
-      padding:20px;
-      pointer-events:none; /* default not interactive when hidden */
-    }
-    .modal-overlay.visible{pointer-events:auto;}
-    .modal-content{
-      background:var(--card);
-      border-radius:12px;
-      padding:28px 24px;
-      box-shadow:0 12px 30px rgba(2,6,23,0.35);
-      min-width:220px;
-      max-width:90%;
-      text-align:center;
-      font-weight:800;
-      font-size:1.15rem;
-      color:var(--primary);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100%;
-      -webkit-font-smoothing:antialiased;
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 23, 0.45);
+      z-index: 1200;
+      padding: 20px;
+      pointer-events: none;
+      /* default not interactive when hidden */
     }
 
-    .app-shell{
-      width:min(1040px,100%);
-      margin:0 auto;
-      padding:clamp(16px,4vw,32px);
+    .modal-overlay.visible {
+      pointer-events: auto;
     }
-    @supports (zoom:1){
-      .app-shell{zoom:var(--zoom);}
+
+    .modal-content {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+      min-width: 220px;
+      max-width: 90%;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--primary);
     }
-    @supports not (zoom:1){
-      .app-shell{
-        transform:scale(var(--zoom));
-        transform-origin:top center;
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell {
+      width: min(1040px, 100%);
+      margin: 0 auto;
+      padding: clamp(16px, 4vw, 32px);
+    }
+
+    @supports (zoom:1) {
+      .app-shell {
+        zoom: var(--zoom);
       }
-      body{overflow-x:auto;}
     }
 
-    .container{
-      display:flex;
-      flex-direction:column;
-      gap:clamp(16px,3vw,24px);
+    @supports not (zoom:1) {
+      .app-shell {
+        transform: scale(var(--zoom));
+        transform-origin: top center;
+      }
+
+      body {
+        overflow-x: auto;
+      }
     }
-    header h1{font-size:clamp(1.9rem,2.6vw,2.6rem);margin:0}
-    header .sub{color:var(--muted);margin:6px 0 8px;font-size:0.95rem}
 
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .panel .row + .row{margin-top:4px}
-
-    .alert{padding:12px 16px;border-radius:12px;font-weight:600;display:flex;align-items:center;gap:8px;border:1px solid transparent}
-    .alert-error{background:#fee2e2;border-color:#fecaca;color:#7f1d1d}
-    .alert-success{background:#dcfce7;border-color:#bbf7d0;color:#14532d}
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border:0;
-      border-radius:12px;
-      cursor:pointer;
-      padding:12px 16px;
-      font-weight:700;
-      color:#fff;
-      box-shadow:var(--shadow);
-      transition:background-color .2s ease,transform .2s ease;
-      appearance:none;
-      text-decoration:none;
-      touch-action:manipulation;
-      -webkit-tap-highlight-color:transparent;
-      user-select:none;
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(16px, 3vw, 24px);
     }
-    .btn:active{transform:translateY(1px)}
-    .btn-text{background:#e5e7eb;color:#111827}
-    .btn-primary{background:#3b82f6}
-    .btn-danger{background:var(--danger)}
+
+    header h1 {
+      font-size: clamp(1.9rem, 2.6vw, 2.6rem);
+      margin: 0
+    }
+
+    header .sub {
+      color: var(--muted);
+      margin: 6px 0 8px;
+      font-size: 0.95rem
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .panel .row+.row {
+      margin-top: 4px
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid transparent
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #7f1d1d
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #14532d
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: var(--shadow);
+      transition: background-color .2s ease, transform .2s ease;
+      appearance: none;
+      text-decoration: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px)
+    }
+
+    .btn-text {
+      background: #e5e7eb;
+      color: #111827
+    }
+
+    .btn-primary {
+      background: #3b82f6
+    }
+
+    .btn-danger {
+      background: var(--danger)
+    }
+
     /* export button (green) */
-    .btn-export{background:#10b981} 
-
-    input[type=text],input[type=number]{
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px 12px;
-      background:#f1f5f9;
-      font-size:1rem;
-      flex:1;
-    }
-    input[type=number]{width:80px}
-
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:16px}
-    .card header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-    .mouse-id{font-weight:800;font-size:1.1rem}
-    .trash{background:var(--danger);color:#fff;border:0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-
-    [role="button"]{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border-radius:12px;padding:10px 12px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
-    [role="button"]:focus{outline:3px solid Highlight;outline-offset:2px}
-    [role="button"]:active{transform:translateY(1px)}
-
-    .seq{border:1px dashed var(--border);border-radius:10px;padding:10px;min-height:58px;overflow:auto;white-space:pre-wrap;line-height:28px;font-size:1.25rem;letter-spacing:.1em;background:#f8fafc}
-    .section-title{text-align:center;margin:0;font-weight:800;font-size:0.95rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .stat{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center}
-    .stat .label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-    .stat .value{font-size:1.5rem;font-weight:900;margin-top:4px;color:var(--primary)}
-
-    .actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
-    .actions .btn{width:100%}
-    .btn-a{background:var(--btnA)}
-    .btn-b{background:var(--btnB)}
-    .btn-c{background:var(--danger)}
-    .btn-undo{background:var(--btnUndo)}
-
-    .topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:12px 0}
-    .timer{display:flex;flex-direction:column;gap:12px;width:100%}
-    .timer-left{display:flex;flex-direction:column;gap:12px;width:100%}
-    .timer-main{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%}
-    .timer-main label{width:100%}
-    .timer label{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}
-    .timer-actions{display:flex;gap:8px;width:100%}
-    .timer-actions .btn{flex:1;min-width:0}
-    .timer .time{font-weight:900;font-size:1.4rem;background:#0f172a;color:#fff;padding:8px 12px;border-radius:10px;letter-spacing:.03em}
-
-    .zoom-controls{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      margin-left:0;
-      width:100%
-    }
-    .zoom-controls .btn{
-      flex:1;
-      min-width:0;
-      height:44px;
-      padding:0;
-      font-size:1.1rem;
-      font-weight:700;
-      color:var(--text);
-      background:#e2e8f0;
-      border:1px solid var(--border);
-      box-shadow:none;
-    }
-    .zoom-controls .btn:active{transform:translateY(1px)}
-    #zoomReset{font-size:1rem}
-    .zoom-value{flex:1;min-width:0;height:44px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;color:var(--muted);background:#f8fafc;border:1px solid var(--border);border-radius:12px}
-    .zoom-label{
-      font-weight:600;
-      color:var(--muted);
-      font-size:0.9rem;
+    .btn-export {
+      background: #10b981
     }
 
-    .hidden{display:none}
-    .session-badge{font-weight:700;color:var(--primary);letter-spacing:.08em;font-size:0.85rem}
-    .session-name-container{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-    .session-name-display{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .session-rename{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .session-rename-input{flex:1;min-width:160px}
-    .grow{flex:1}
+    input[type=text],
+    input[type=number] {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #f1f5f9;
+      font-size: 1rem;
+      flex: 1;
+    }
 
-    @media (max-width:900px){
-      .seq{font-size:1.1rem;line-height:26px}
-      .timer .time{font-size:1.2rem}
+    input[type=number] {
+      width: 80px
     }
-    @media (max-width:720px){
-      .panel{padding:14px}
-      .row{flex-direction:column;align-items:stretch}
-      input[type=text]{width:100%}
-      header h1{text-align:center}
-      header .sub{text-align:center}
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px
     }
-    @media (min-width:720px){
-      .timer{flex-direction:row;align-items:center;justify-content:space-between}
-      .timer-left{flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;width:auto}
-      .timer-main{flex-direction:row;align-items:center;gap:12px;width:auto}
-      .timer-actions{gap:10px;width:auto}
-      .timer-actions .btn{flex:none;min-width:88px}
-      .zoom-controls{
-        width:auto;
-        margin-left:auto;
-        flex-wrap:nowrap
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px
+    }
+
+    .mouse-id {
+      font-weight: 800;
+      font-size: 1.1rem
+    }
+
+    .trash {
+      background: var(--danger);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    [role="button"] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 10px 12px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none
+    }
+
+    [role="button"]:focus {
+      outline: 3px solid Highlight;
+      outline-offset: 2px
+    }
+
+    [role="button"]:active {
+      transform: translateY(1px)
+    }
+
+    .seq {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 58px;
+      overflow: auto;
+      white-space: pre-wrap;
+      line-height: 28px;
+      font-size: 1.25rem;
+      letter-spacing: .1em;
+      background: #f8fafc
+    }
+
+    .section-title {
+      text-align: center;
+      margin: 0;
+      font-weight: 800;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted)
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center
+    }
+
+    .stat .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .stat .value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-top: 4px;
+      color: var(--primary)
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px
+    }
+
+    .actions .btn {
+      width: 100%
+    }
+
+    .btn-a {
+      background: var(--btnA)
+    }
+
+    .btn-b {
+      background: var(--btnB)
+    }
+
+    .btn-c {
+      background: var(--danger)
+    }
+
+    .btn-undo {
+      background: var(--btnUndo)
+    }
+
+    .topbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 12px 0
+    }
+
+    .timer {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%
+    }
+
+    .timer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%
+    }
+
+    .timer-main {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      width: 100%
+    }
+
+    .timer-main label {
+      width: 100%
+    }
+
+    .timer label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--muted)
+    }
+
+    .timer-actions {
+      display: flex;
+      gap: 8px;
+      width: 100%
+    }
+
+    .timer-actions .btn {
+      flex: 1;
+      min-width: 0
+    }
+
+    .timer .time {
+      font-weight: 900;
+      font-size: 1.4rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      letter-spacing: .03em
+    }
+
+    .zoom-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-left: 0;
+      width: 100%
+    }
+
+    .zoom-controls .btn {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
+      padding: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      background: #e2e8f0;
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .zoom-controls .btn:active {
+      transform: translateY(1px)
+    }
+
+    #zoomReset {
+      font-size: 1rem
+    }
+
+    .zoom-value {
+      flex: 1;
+      min-width: 0;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px
+    }
+
+    .zoom-label {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none
+    }
+
+    .session-badge {
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: .08em;
+      font-size: 0.85rem
+    }
+
+    .session-name-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start
+    }
+
+    .session-name-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .session-rename {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .session-rename-input {
+      flex: 1;
+      min-width: 160px
+    }
+
+    .grow {
+      flex: 1
+    }
+
+    @media (max-width:900px) {
+      .seq {
+        font-size: 1.1rem;
+        line-height: 26px
       }
-      .zoom-controls .btn{
-        --zoom-btn-size:38px;
-        flex:none;
-        width:var(--zoom-btn-size);
-        min-width:var(--zoom-btn-size);
-        height:var(--zoom-btn-size);
+
+      .timer .time {
+        font-size: 1.2rem
       }
-      .zoom-value{
-        flex:none;
-        min-width:52px;
-        height:auto;
-        padding:0 12px;
-        background:transparent;
-        border:0;
-      }
-      .zoom-label{
-        white-space:nowrap;
-      }
-    }
-    @media (max-width:540px){
-      .grid{grid-template-columns:1fr}
-      .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .timer .time{font-size:1.1rem;padding:6px 10px}
-      .seq{font-size:1.05rem;line-height:24px}
     }
 
+    @media (max-width:720px) {
+      .panel {
+        padding: 14px
+      }
+
+      .row {
+        flex-direction: column;
+        align-items: stretch
+      }
+
+      input[type=text] {
+        width: 100%
+      }
+
+      header h1 {
+        text-align: center
+      }
+
+      header .sub {
+        text-align: center
+      }
+    }
+
+    @media (min-width:720px) {
+      .timer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between
+      }
+
+      .timer-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        width: auto
+      }
+
+      .timer-main {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        width: auto
+      }
+
+      .timer-actions {
+        gap: 10px;
+        width: auto
+      }
+
+      .timer-actions .btn {
+        flex: none;
+        min-width: 88px
+      }
+
+      .zoom-controls {
+        width: auto;
+        margin-left: auto;
+        flex-wrap: nowrap
+      }
+
+      .zoom-controls .btn {
+        --zoom-btn-size: 38px;
+        flex: none;
+        width: var(--zoom-btn-size);
+        min-width: var(--zoom-btn-size);
+        height: var(--zoom-btn-size);
+      }
+
+      .zoom-value {
+        flex: none;
+        min-width: 52px;
+        height: auto;
+        padding: 0 12px;
+        background: transparent;
+        border: 0;
+      }
+
+      .zoom-label {
+        white-space: nowrap;
+      }
+    }
+
+    @media (max-width:540px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .timer .time {
+        font-size: 1.1rem;
+        padding: 6px 10px
+      }
+
+      .seq {
+        font-size: 1.05rem;
+        line-height: 24px
+      }
+    }
   </style>
-  
-<script defer src="https://cloud.umami.is/script.js" data-website-id="bf3b6e9e-d4ba-48e4-8c1f-3f94d46f9dc7"></script>
+
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="bf3b6e9e-d4ba-48e4-8c1f-3f94d46f9dc7"></script>
 
 </head>
+
 <body>
   <div class="app-shell">
     <div class="container">
       <!-- Add GitHub link here -->
       <div style="text-align: center; margin-bottom: 16px;">
-        Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">Alexis Chaussy</a>
+        Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">Alexis
+          Chaussy</a>
       </div>
 
       <header>
@@ -276,7 +663,8 @@
 
       <div id="feedback" class="alert alert-error hidden" role="alert"></div>
       <div id="updateBanner" class="alert alert-success hidden" role="status" aria-live="polite">
-        <span>Une nouvelle version est disponible. Recharger effacera toutes les données enregistrées sur cet appareil.</span>
+        <span>Une nouvelle version est disponible. Recharger effacera toutes les données enregistrées sur cet
+          appareil.</span>
         <button id="updateReload" class="btn btn-primary">Recharger la page</button>
       </div>
       <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
@@ -330,476 +718,549 @@
       <section class="grid" id="cards"></section>
     </div>
   </div>
-<script>
-// --- Storage ---
-const KEY='ymaze.v4';
-const SESSION_NAMES_KEY='ymaze.sessionNames';
-const load=()=>JSON.parse(localStorage.getItem(KEY)||'{}');
-const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
-const loadSessionNames=()=>{try{return JSON.parse(localStorage.getItem(SESSION_NAMES_KEY)||'[]');}catch(e){return[];}};
-const storeSessionNames=names=>localStorage.setItem(SESSION_NAMES_KEY,JSON.stringify(names));
-const rememberSessionName=name=>{const names=loadSessionNames();if(!names.includes(name)){names.push(name);storeSessionNames(names);}};
-function newState(name){const m=8;return{session:{name,startedAt:new Date().toISOString()},mice:[],timer:{duration:m*60,remaining:m*60,running:false,last:null},uiZoom:1};}
-function newMouse(id){return{id,seq:['C']};}
+  <script>
+    // --- Storage ---
+    const KEY = 'ymaze.v4';
+    const SESSION_NAMES_KEY = 'ymaze.sessionNames';
+    const load = () => JSON.parse(localStorage.getItem(KEY) || '{}');
+    const save = s => localStorage.setItem(KEY, JSON.stringify(s));
+    const loadSessionNames = () => { try { return JSON.parse(localStorage.getItem(SESSION_NAMES_KEY) || '[]'); } catch (e) { return []; } };
+    const storeSessionNames = names => localStorage.setItem(SESSION_NAMES_KEY, JSON.stringify(names));
+    const rememberSessionName = name => { const names = loadSessionNames(); if (!names.includes(name)) { names.push(name); storeSessionNames(names); } };
+    function newState(name) { const m = 8; return { session: { name, startedAt: new Date().toISOString() }, mice: [], timer: { duration: m * 60, remaining: m * 60, running: false, last: null }, uiZoom: 1 }; }
+    function newMouse(id) { return { id, seq: ['C'] }; }
 
-// --- Stats ---
-function computeStats(seq) {
-    const entriesTotal = seq.length;
-    let alters = 0;
-    for (let i = 0; i + 2 < entriesTotal; i++) {
+    // --- Stats ---
+    function computeStats(seq) {
+      const entriesTotal = seq.length;
+      let alters = 0;
+      for (let i = 0; i + 2 < entriesTotal; i++) {
         const [x, y, z] = [seq[i], seq[i + 1], seq[i + 2]];
         if (x !== y && y !== z && x !== z) alters++;
-    }
-    const denom = Math.max(0, entriesTotal - 2);
-    const ratio = denom > 0 ? (alters / denom * 100) : 0;
-    return { entries: entriesTotal, alters, ratio };
-}
-
-function formatRatio(value) {
-    return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
-}
-
-// --- UI helpers ---
-const sessionCreate=document.getElementById('sessionCreate'),
-sessionControls=document.getElementById('sessionControls'),
-sessionInfo=document.getElementById('sessionInfo'),
-sessionNameDisplay=document.getElementById('sessionNameDisplay'),
-sessionRenameForm=document.getElementById('sessionRenameForm'),
-sessionRenameInput=document.getElementById('sessionRenameInput'),
-sessionRenameBtn=document.getElementById('sessionRenameBtn'),
-sessionRenameSave=document.getElementById('sessionRenameSave'),
-sessionRenameCancel=document.getElementById('sessionRenameCancel'),
-cardsEl=document.getElementById('cards'),
-timerDisplay=document.getElementById('timerDisplay'),
-timerMinutes=document.getElementById('timerMinutes'),
-feedbackEl=document.getElementById('feedback'),
-updateBanner=document.getElementById('updateBanner'),
-updateReloadBtn=document.getElementById('updateReload');
-let feedbackTimeout=null;
-function hideMessage(){if(!feedbackEl)return;clearTimeout(feedbackTimeout);feedbackEl.classList.add('hidden');}
-function showMessage(message,type='error'){
-  if(!feedbackEl)return;
-  feedbackEl.textContent=message;
-  feedbackEl.classList.remove('hidden','alert-error','alert-success');
-  feedbackEl.classList.add(type==='success'?'alert-success':'alert-error');
-  if(feedbackEl.scrollIntoView){feedbackEl.scrollIntoView({behavior:'smooth',block:'start'});}
-  clearTimeout(feedbackTimeout);
-  feedbackTimeout=setTimeout(()=>feedbackEl.classList.add('hidden'),4000);
-}
-// --- Timer modal helpers ---
-const timerModal = document.getElementById('timerModal');
-const modalContent = timerModal ? timerModal.querySelector('.modal-content') : null;
-let _disabledDuringModal = [];
-function disableAllInteractiveExceptModal(){
-  _disabledDuringModal = [];
-  const elems = Array.from(document.querySelectorAll('button, input, select, textarea, [role="button"], a[href]'));
-  for(const el of elems){
-    if(timerModal && timerModal.contains(el)) continue;
-    const record = {el};
-    // store state depending on element type
-    if('disabled' in el){
-      record.prevDisabled = el.disabled;
-      el.disabled = true;
-    }
-    if(el.getAttribute && el.getAttribute('tabindex')!==null){
-      record.prevTab = el.getAttribute('tabindex');
-      el.setAttribute('tabindex', '-1');
-    } else if(el.hasAttribute && (el.getAttribute('role') && el.getAttribute('role') !== 'button')) {
-      // nothing
-    } else if(el.getAttribute && !el.hasAttribute('tabindex') && (el.getAttribute('role')==='button' || el.tagName==='A')){
-      record.prevTab = null;
-      el.setAttribute('tabindex', '-1');
-    }
-    if(el.tagName === 'A' && el.hasAttribute('href')){
-      record.prevHref = el.getAttribute('href');
-      el.removeAttribute('href');
-    }
-    _disabledDuringModal.push(record);
-  }
-}
-function restoreInteractiveAfterModal(){
-  for(const r of _disabledDuringModal){
-    try{
-      const el = r.el;
-      if('prevDisabled' in r && 'disabled' in el) el.disabled = r.prevDisabled;
-      if('prevTab' in r){
-        if(r.prevTab===null) el.removeAttribute('tabindex'); else el.setAttribute('tabindex', r.prevTab);
       }
-      if('prevHref' in r && r.prevHref!=null) el.setAttribute('href', r.prevHref);
-    }catch(e){}
-  }
-  _disabledDuringModal = [];
-}
-// show modal for ms milliseconds (non-dismissible during that time)
-function showTimerModal(ms=3000){
-  if(!timerModal) return;
-  // show
-  timerModal.classList.remove('hidden');
-  timerModal.classList.add('visible');
-  timerModal.setAttribute('aria-hidden','false');
-  disableAllInteractiveExceptModal();
-  // ensure modal is focused to prevent accidental focus elsewhere
-  try{ timerModal.focus(); }catch(e){}
-  // dismiss after ms and restore
-  setTimeout(()=>{
-    timerModal.classList.add('hidden');
-    timerModal.classList.remove('visible');
-    timerModal.setAttribute('aria-hidden','true');
-    restoreInteractiveAfterModal();
-  }, ms);
-}
-function setView(){
-  const s=load();
-  if(!s.session){
-    sessionCreate.classList.remove('hidden');
-    sessionControls.classList.add('hidden');
-    cardsEl.innerHTML='';
-    if(sessionNameDisplay&&sessionRenameForm){
-      sessionNameDisplay.classList.remove('hidden');
-      sessionRenameForm.classList.add('hidden');
-      if(sessionRenameInput)sessionRenameInput.value='';
+      const denom = Math.max(0, entriesTotal - 2);
+      const ratio = denom > 0 ? (alters / denom * 100) : 0;
+      return { entries: entriesTotal, alters, ratio };
     }
-  }else{
-    sessionCreate.classList.add('hidden');
-    sessionControls.classList.remove('hidden');
-    sessionInfo.textContent='Session: '+s.session.name;
-  }
-  hideMessage();
-}
-function applyZoomFromState(){const s=load();const z=(s && s.uiZoom)?s.uiZoom:1;document.documentElement.style.setProperty('--zoom',z);const valueEl=document.getElementById('zoomValue');if(valueEl){valueEl.textContent=`${Math.round(z*100)}%`;}}
-function formatTime(sec){const mm=String(Math.floor(sec/60)).padStart(2,'0');const ss=String(sec%60).padStart(2,'0');return `${mm}:${ss}`;}
 
-function toggleRenameForm(show){
-  if(!sessionNameDisplay||!sessionRenameForm)return;
-  if(show){
-    sessionNameDisplay.classList.add('hidden');
-    sessionRenameForm.classList.remove('hidden');
-    if(sessionRenameInput){
-      const s=load();
-      sessionRenameInput.value=s.session?s.session.name:'';
-      sessionRenameInput.focus();
-      if(sessionRenameInput.select)sessionRenameInput.select();
+    function formatRatio(value) {
+      return Number.isFinite(value) ? Number(value).toFixed(2) : '0.00';
     }
-    hideMessage();
-  }else{
-    sessionNameDisplay.classList.remove('hidden');
-    sessionRenameForm.classList.add('hidden');
-    if(sessionRenameInput)sessionRenameInput.value='';
-  }
-}
 
-// Create a single card element for a mouse
-function createCardElement(m) {
-    const { entries, alters, ratio } = computeStats(m.seq);
-    const displayRatio = formatRatio(ratio);
-    const c = document.createElement('article');
-    c.className = 'card';
-    c.innerHTML = `<header><div class="mouse-id">Mouse ID: <span>${m.id}</span></div><button class="trash" data-id="${m.id}">Delete</button></header>
-        <div class="seq">${m.seq.join(' ')}</div>
-        <div class="section-title">Analysis</div>
-        <div class="stats">
-            <div class="stat"><div class="label">Entries</div><div class="value">${entries}</div></div>
-            <div class="stat"><div class="label">Altern.</div><div class="value">${alters}</div></div>
-            <div class="stat"><div class="label">Ratio %</div><div class="value">${displayRatio}</div></div>
-        </div>
-        <div class="actions">
-            <div role="button" tabindex="0" class="btn btn-a" data-letter="A" data-id="${m.id}">A</div>
-            <div role="button" tabindex="0" class="btn btn-b" data-letter="B" data-id="${m.id}">B</div>
-            <div role="button" tabindex="0" class="btn btn-c" data-letter="C" data-id="${m.id}">C</div>
-            <div role="button" tabindex="0" class="btn btn-undo" data-undo="${m.id}">Undo</div>
-        </div>`;
-    return c;
-}
-
-function updateCardElement(cardEl, m){
-  const stats = computeStats(m.seq);
-  const seqEl = cardEl.querySelector('.seq');
-  if(seqEl) seqEl.textContent = m.seq.join(' ');
-  const vals = cardEl.querySelectorAll('.stat .value');
-  if(vals && vals.length>=3){
-    vals[0].textContent = stats.entries;
-    vals[1].textContent = stats.alters;
-    vals[2].textContent = formatRatio(stats.ratio);
-  }
-}
-
-// Full render (used on session create / load)
-function render(){
-  setView();
-  const s=load();
-  if(!s.session) return;
-  applyZoomFromState();
-  timerMinutes.value=Math.round(s.timer.duration/60);
-  timerDisplay.textContent = formatTime(s.timer.remaining);
-  cardsEl.innerHTML='';
-  for(const m of s.mice){
-    cardsEl.appendChild(createCardElement(m));
-  }
-}
-
-// --- Session actions ---
-const handleCreateSession=()=>{
-  const input=document.getElementById('sessionName');
-  if(!input)return;
-  const name=input.value.trim();
-  if(!name){showMessage('Please enter a session name.');input.focus();return;}
-  const existingNames=loadSessionNames();
-  if(existingNames.includes(name)){showMessage('This session name already exists.');input.focus();return;}
-  save(newState(name));
-  rememberSessionName(name);
-  input.value='';
-  hideMessage();
-  render();
-};
-const handleRenameSession=()=>{
-  if(!sessionRenameInput)return;
-  const s=load();
-  if(!s.session)return;
-  const newName=sessionRenameInput.value.trim();
-  if(!newName){showMessage('Veuillez saisir un nom de session.');sessionRenameInput.focus();return;}
-  const oldName=s.session.name;
-  const storedNames=loadSessionNames();
-  const namesWithoutCurrent=storedNames.filter(n=>n!==oldName);
-  if(namesWithoutCurrent.includes(newName)){showMessage('Ce nom de session existe déjà.');sessionRenameInput.focus();return;}
-  s.session.name=newName;
-  save(s);
-  const updatedNames=[...namesWithoutCurrent];
-  if(!updatedNames.includes(newName))updatedNames.push(newName);
-  storeSessionNames(updatedNames);
-  sessionInfo.textContent='Session: '+newName;
-  toggleRenameForm(false);
-  showMessage('Nom de session mis à jour.','success');
-};
-document.getElementById('createSession').onclick=handleCreateSession;
-document.getElementById('sessionName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleCreateSession();}});
-if(sessionRenameBtn)sessionRenameBtn.onclick=()=>{const s=load();if(!s.session)return;toggleRenameForm(true);};
-if(sessionRenameCancel)sessionRenameCancel.onclick=()=>toggleRenameForm(false);
-if(sessionRenameSave)sessionRenameSave.onclick=()=>handleRenameSession();
-if(sessionRenameInput)sessionRenameInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleRenameSession();}if(e.key==='Escape'){e.preventDefault();toggleRenameForm(false);}});
-document.getElementById('newSession').onclick=()=>{
-  if(!confirm('Create new session? Unsaved data will be lost.')) return;
-  const state=load();
-  const currentName=state && state.session ? state.session.name : null;
-  if(currentName){
-    const filtered=loadSessionNames().filter(n=>n!==currentName);
-    storeSessionNames(filtered);
-  }
-  localStorage.removeItem(KEY);
-  setView();
-  cardsEl.innerHTML='';
-  hideMessage();
-};
-
-// --- Mice actions ---
-document.getElementById('addBtn').onclick=()=>{
-  const input=document.getElementById('mouseInput');
-  if(!input)return;
-  const id=input.value.trim();
-  if(!id){showMessage('Please enter a mouse ID.');input.focus();return;}
-  const s=load();
-  if(!s.session)return;
-  if(s.mice.some(m=>m.id===id)){showMessage(`ID "${id}" is already used in this session.`);input.focus();return;}
-  const m=newMouse(id);
-  s.mice.push(m);
-  save(s);
-  input.value='';
-  hideMessage();
-  cardsEl.appendChild(createCardElement(m));
-};
-document.getElementById('mouseInput').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addBtn').click();};
-
-// Efficient event delegation using pointer events (faster on mobile). Works with role=button divs.
-function handleCardActionEvent(target){
-  const el = (target && target.closest) ? target.closest('[data-letter], [data-undo], .trash') : null;
-  if(!el) return;
-  const s=load();
-  if(!s.session) return;
-
-  // Letter buttons
-  if(el.dataset.letter){
-    const id=el.dataset.id;
-    const m=s.mice.find(x=>x.id===id);
-    if(!m) return;
-    m.seq.push(el.dataset.letter);
-    save(s);
-    const card = el.closest('.card');
-    if(card) updateCardElement(card, m);
-    return;
-  }
-
-  // Undo
-  if(el.dataset.undo){
-    const id=el.dataset.undo;
-    const m=s.mice.find(x=>x.id===id);
-    if(!m) return;
-    if(m.seq.length>1) m.seq.pop();
-    save(s);
-    const card = el.closest('.card');
-    if(card) updateCardElement(card, m);
-    return;
-  }
-
-  // Trash (delete)
-  if(el.classList.contains('trash')){
-    const id=el.dataset.id;
-    const mouse = s.mice.find(x=>x.id===id);
-    const confirmMsg = mouse ? `Delete mouse "${mouse.id}"? This removes its entries.` : 'Delete this mouse?';
-    if(!window.confirm(confirmMsg)) return;
-    s.mice = s.mice.filter(x=>x.id!==id);
-    save(s);
-    const card = el.closest('.card');
-    if(card) card.remove();
-    return;
-  }
-}
-
-const supportsPointerEvents = 'PointerEvent' in window;
-if(supportsPointerEvents){
-  cardsEl.addEventListener('pointerdown', e=>{
-    if(e.button && e.button !== 0) return;
-    handleCardActionEvent(e.target);
-    if(e.pointerType === 'touch') e.preventDefault();
-  });
-} else {
-  cardsEl.addEventListener('click', e=>handleCardActionEvent(e.target));
-}
-// keyboard support for accessible div buttons
-cardsEl.addEventListener('keydown', e=>{
-  if(e.key === 'Enter' || e.key === ' '){
-    e.preventDefault();
-    handleCardActionEvent(e.target);
-  }
-});
-
-// --- Timer ---
-let rafId=null;
-function tick(){
-  const s = load();
-  if(!s.timer.running) return;
-  const now = Date.now();
-  const last = s.timer.last || now;
-  const dt = Math.floor((now - last) / 1000);
-  if(dt > 0){
-    s.timer.remaining = Math.max(0, s.timer.remaining - dt);
-    s.timer.last = now;
-    if(s.timer.remaining === 0){
-      s.timer.running = false;
-      s.timer.last = null;
-      // show modal centered for 3s and block all other controls while visible
-      showTimerModal(3000);
+    // --- UI helpers ---
+    const sessionCreate = document.getElementById('sessionCreate'),
+      sessionControls = document.getElementById('sessionControls'),
+      sessionInfo = document.getElementById('sessionInfo'),
+      sessionNameDisplay = document.getElementById('sessionNameDisplay'),
+      sessionRenameForm = document.getElementById('sessionRenameForm'),
+      sessionRenameInput = document.getElementById('sessionRenameInput'),
+      sessionRenameBtn = document.getElementById('sessionRenameBtn'),
+      sessionRenameSave = document.getElementById('sessionRenameSave'),
+      sessionRenameCancel = document.getElementById('sessionRenameCancel'),
+      cardsEl = document.getElementById('cards'),
+      timerDisplay = document.getElementById('timerDisplay'),
+      timerMinutes = document.getElementById('timerMinutes'),
+      feedbackEl = document.getElementById('feedback'),
+      updateBanner = document.getElementById('updateBanner'),
+      updateReloadBtn = document.getElementById('updateReload');
+    let feedbackTimeout = null;
+    function hideMessage() { if (!feedbackEl) return; clearTimeout(feedbackTimeout); feedbackEl.classList.add('hidden'); }
+    function showMessage(message, type = 'error') {
+      if (!feedbackEl) return;
+      feedbackEl.textContent = message;
+      feedbackEl.classList.remove('hidden', 'alert-error', 'alert-success');
+      feedbackEl.classList.add(type === 'success' ? 'alert-success' : 'alert-error');
+      if (feedbackEl.scrollIntoView) { feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      clearTimeout(feedbackTimeout);
+      feedbackTimeout = setTimeout(() => feedbackEl.classList.add('hidden'), 4000);
     }
-    save(s);
-    timerDisplay.textContent = formatTime(s.timer.remaining);
-  }
-  rafId = requestAnimationFrame(tick);
-}
-document.getElementById('timerPlay').onclick=()=>{const s=load();if(!s.session)return;if(!s.timer.running){s.timer.running=true;s.timer.last=Date.now();save(s);if(!rafId)rafId=requestAnimationFrame(tick);} };
-document.getElementById('timerPause').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;save(s);if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
-document.getElementById('timerReset').onclick=()=>{const s=load();s.timer.running=false;s.timer.last=null;s.timer.remaining=s.timer.duration;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
-timerMinutes.onchange=()=>{const mins=Math.max(1,parseInt(timerMinutes.value||'8',10));const s=load();s.timer.duration=mins*60;s.timer.remaining=s.timer.duration;s.timer.running=false;s.timer.last=null;save(s);render();if(rafId){cancelAnimationFrame(rafId);rafId=null;}};
+    // --- Timer modal helpers ---
+    const timerModal = document.getElementById('timerModal');
+    const modalContent = timerModal ? timerModal.querySelector('.modal-content') : null;
+    let _disabledDuringModal = [];
+    function disableAllInteractiveExceptModal() {
+      _disabledDuringModal = [];
+      const elems = Array.from(document.querySelectorAll('button, input, select, textarea, [role="button"], a[href]'));
+      for (const el of elems) {
+        if (timerModal && timerModal.contains(el)) continue;
+        const record = { el };
+        // store state depending on element type
+        if ('disabled' in el) {
+          record.prevDisabled = el.disabled;
+          el.disabled = true;
+        }
+        if (el.getAttribute && el.getAttribute('tabindex') !== null) {
+          record.prevTab = el.getAttribute('tabindex');
+          el.setAttribute('tabindex', '-1');
+        } else if (el.hasAttribute && (el.getAttribute('role') && el.getAttribute('role') !== 'button')) {
+          // nothing
+        } else if (el.getAttribute && !el.hasAttribute('tabindex') && (el.getAttribute('role') === 'button' || el.tagName === 'A')) {
+          record.prevTab = null;
+          el.setAttribute('tabindex', '-1');
+        }
+        if (el.tagName === 'A' && el.hasAttribute('href')) {
+          record.prevHref = el.getAttribute('href');
+          el.removeAttribute('href');
+        }
+        _disabledDuringModal.push(record);
+      }
+    }
+    function restoreInteractiveAfterModal() {
+      for (const r of _disabledDuringModal) {
+        try {
+          const el = r.el;
+          if ('prevDisabled' in r && 'disabled' in el) el.disabled = r.prevDisabled;
+          if ('prevTab' in r) {
+            if (r.prevTab === null) el.removeAttribute('tabindex'); else el.setAttribute('tabindex', r.prevTab);
+          }
+          if ('prevHref' in r && r.prevHref != null) el.setAttribute('href', r.prevHref);
+        } catch (e) { }
+      }
+      _disabledDuringModal = [];
+    }
+    // show modal for ms milliseconds (non-dismissible during that time)
+    function showTimerModal(ms = 3000) {
+      if (!timerModal) return;
+      // show
+      timerModal.classList.remove('hidden');
+      timerModal.classList.add('visible');
+      timerModal.setAttribute('aria-hidden', 'false');
+      disableAllInteractiveExceptModal();
+      // ensure modal is focused to prevent accidental focus elsewhere
+      try { timerModal.focus(); } catch (e) { }
+      // dismiss after ms and restore
+      setTimeout(() => {
+        timerModal.classList.add('hidden');
+        timerModal.classList.remove('visible');
+        timerModal.setAttribute('aria-hidden', 'true');
+        restoreInteractiveAfterModal();
+      }, ms);
+    }
+    function setView() {
+      const s = load();
+      if (!s.session) {
+        sessionCreate.classList.remove('hidden');
+        sessionControls.classList.add('hidden');
+        cardsEl.innerHTML = '';
+        if (sessionNameDisplay && sessionRenameForm) {
+          sessionNameDisplay.classList.remove('hidden');
+          sessionRenameForm.classList.add('hidden');
+          if (sessionRenameInput) sessionRenameInput.value = '';
+        }
+      } else {
+        sessionCreate.classList.add('hidden');
+        sessionControls.classList.remove('hidden');
+        sessionInfo.textContent = 'Session: ' + s.session.name;
+      }
+      hideMessage();
+    }
+    function applyZoomFromState() { const s = load(); const z = (s && s.uiZoom) ? s.uiZoom : 1; document.documentElement.style.setProperty('--zoom', z); const valueEl = document.getElementById('zoomValue'); if (valueEl) { valueEl.textContent = `${Math.round(z * 100)}%`; } }
+    function formatTime(sec) { const mm = String(Math.floor(sec / 60)).padStart(2, '0'); const ss = String(sec % 60).padStart(2, '0'); return `${mm}:${ss}`; }
 
-// --- Zoom controls ---
-function setZoom(z) {
-  const s = load();
-  s.uiZoom = Math.max(0.4, Math.min(1.6, Number(z)));
-  save(s);
-  document.documentElement.style.setProperty('--zoom', s.uiZoom);
-  // Update zoom display
-  const percent = Math.round(s.uiZoom * 100);
-  document.getElementById('zoomValue').textContent = `${percent}%`;
-}
-document.getElementById('zoomIn').onclick=()=>{const s=load();setZoom((s.uiZoom||1)*1.1);};
-document.getElementById('zoomOut').onclick=()=>{const s=load();setZoom((s.uiZoom||1)/1.1);};
-document.getElementById('zoomReset').onclick=()=>{setZoom(1);};
+    function toggleRenameForm(show) {
+      if (!sessionNameDisplay || !sessionRenameForm) return;
+      if (show) {
+        sessionNameDisplay.classList.add('hidden');
+        sessionRenameForm.classList.remove('hidden');
+        if (sessionRenameInput) {
+          const s = load();
+          sessionRenameInput.value = s.session ? s.session.name : '';
+          sessionRenameInput.focus();
+          if (sessionRenameInput.select) sessionRenameInput.select();
+        }
+        hideMessage();
+      } else {
+        sessionNameDisplay.classList.remove('hidden');
+        sessionRenameForm.classList.add('hidden');
+        if (sessionRenameInput) sessionRenameInput.value = '';
+      }
+    }
 
-// --- CSV Export ---
-document.getElementById('exportBtn').onclick = () => {
-    const s = load();
-    if (!s.session) return;
+    // Create a single card element for a mouse
+    function createCardElement(m) {
+      const { entries, alters, ratio } = computeStats(m.seq);
+      const displayRatio = formatRatio(ratio);
 
-    const sep = ';'; // change to ',' or '\t' if you prefer
-    const rows = [['session', 'startedAt', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
-    for (const m of s.mice) {
+      // Main container
+      const c = document.createElement('article');
+      c.className = 'card';
+
+      // -- Header --
+      const header = document.createElement('header');
+
+      const divId = document.createElement('div');
+      divId.className = 'mouse-id';
+      divId.appendChild(document.createTextNode('Mouse ID: '));
+      const spanId = document.createElement('span');
+      spanId.textContent = m.id; // Correctly escapes user input
+      divId.appendChild(spanId);
+
+      const btnTrash = document.createElement('button');
+      btnTrash.className = 'trash';
+      btnTrash.dataset.id = m.id;
+      btnTrash.textContent = 'Delete';
+
+      header.appendChild(divId);
+      header.appendChild(btnTrash);
+      c.appendChild(header);
+
+      // -- Sequence --
+      const divSeq = document.createElement('div');
+      divSeq.className = 'seq';
+      divSeq.textContent = m.seq.join(' ');
+      c.appendChild(divSeq);
+
+      // -- Analysis Title --
+      const divTitle = document.createElement('div');
+      divTitle.className = 'section-title';
+      divTitle.textContent = 'Analysis';
+      c.appendChild(divTitle);
+
+      // -- Stats --
+      const divStats = document.createElement('div');
+      divStats.className = 'stats';
+
+      const createStat = (label, value) => {
+        const d = document.createElement('div');
+        d.className = 'stat';
+        const l = document.createElement('div');
+        l.className = 'label';
+        l.textContent = label;
+        const v = document.createElement('div');
+        v.className = 'value';
+        v.textContent = value;
+        d.appendChild(l);
+        d.appendChild(v);
+        return d;
+      };
+
+      divStats.appendChild(createStat('Entries', entries));
+      divStats.appendChild(createStat('Altern.', alters));
+      divStats.appendChild(createStat('Ratio %', displayRatio));
+      c.appendChild(divStats);
+
+      // -- Actions --
+      const divActions = document.createElement('div');
+      divActions.className = 'actions';
+
+      const createBtn = (letter, className) => {
+        const btn = document.createElement('div');
+        btn.role = 'button';
+        btn.tabIndex = 0;
+        btn.className = `btn ${className}`;
+        btn.dataset.letter = letter;
+        btn.dataset.id = m.id;
+        btn.textContent = letter;
+        return btn;
+      };
+
+      divActions.appendChild(createBtn('A', 'btn-a'));
+      divActions.appendChild(createBtn('B', 'btn-b'));
+      divActions.appendChild(createBtn('C', 'btn-c'));
+
+      const btnUndo = document.createElement('div');
+      btnUndo.role = 'button';
+      btnUndo.tabIndex = 0;
+      btnUndo.className = 'btn btn-undo';
+      btnUndo.dataset.undo = m.id;
+      btnUndo.textContent = 'Undo';
+      divActions.appendChild(btnUndo);
+
+      c.appendChild(divActions);
+
+      return c;
+    }
+
+    function updateCardElement(cardEl, m) {
+      const stats = computeStats(m.seq);
+      const seqEl = cardEl.querySelector('.seq');
+      if (seqEl) seqEl.textContent = m.seq.join(' ');
+      const vals = cardEl.querySelectorAll('.stat .value');
+      if (vals && vals.length >= 3) {
+        vals[0].textContent = stats.entries;
+        vals[1].textContent = stats.alters;
+        vals[2].textContent = formatRatio(stats.ratio);
+      }
+    }
+
+    // Full render (used on session create / load)
+    function render() {
+      setView();
+      const s = load();
+      if (!s.session) return;
+      applyZoomFromState();
+      timerMinutes.value = Math.round(s.timer.duration / 60);
+      timerDisplay.textContent = formatTime(s.timer.remaining);
+      cardsEl.innerHTML = '';
+      for (const m of s.mice) {
+        cardsEl.appendChild(createCardElement(m));
+      }
+    }
+
+    // --- Session actions ---
+    const handleCreateSession = () => {
+      const input = document.getElementById('sessionName');
+      if (!input) return;
+      const name = input.value.trim();
+      if (!name) { showMessage('Please enter a session name.'); input.focus(); return; }
+      const existingNames = loadSessionNames();
+      if (existingNames.includes(name)) { showMessage('This session name already exists.'); input.focus(); return; }
+      save(newState(name));
+      rememberSessionName(name);
+      input.value = '';
+      hideMessage();
+      render();
+    };
+    const handleRenameSession = () => {
+      if (!sessionRenameInput) return;
+      const s = load();
+      if (!s.session) return;
+      const newName = sessionRenameInput.value.trim();
+      if (!newName) { showMessage('Veuillez saisir un nom de session.'); sessionRenameInput.focus(); return; }
+      const oldName = s.session.name;
+      const storedNames = loadSessionNames();
+      const namesWithoutCurrent = storedNames.filter(n => n !== oldName);
+      if (namesWithoutCurrent.includes(newName)) { showMessage('Ce nom de session existe déjà.'); sessionRenameInput.focus(); return; }
+      s.session.name = newName;
+      save(s);
+      const updatedNames = [...namesWithoutCurrent];
+      if (!updatedNames.includes(newName)) updatedNames.push(newName);
+      storeSessionNames(updatedNames);
+      sessionInfo.textContent = 'Session: ' + newName;
+      toggleRenameForm(false);
+      showMessage('Nom de session mis à jour.', 'success');
+    };
+    document.getElementById('createSession').onclick = handleCreateSession;
+    document.getElementById('sessionName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateSession(); } });
+    if (sessionRenameBtn) sessionRenameBtn.onclick = () => { const s = load(); if (!s.session) return; toggleRenameForm(true); };
+    if (sessionRenameCancel) sessionRenameCancel.onclick = () => toggleRenameForm(false);
+    if (sessionRenameSave) sessionRenameSave.onclick = () => handleRenameSession();
+    if (sessionRenameInput) sessionRenameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleRenameSession(); } if (e.key === 'Escape') { e.preventDefault(); toggleRenameForm(false); } });
+    document.getElementById('newSession').onclick = () => {
+      if (!confirm('Create new session? Unsaved data will be lost.')) return;
+      const state = load();
+      const currentName = state && state.session ? state.session.name : null;
+      if (currentName) {
+        const filtered = loadSessionNames().filter(n => n !== currentName);
+        storeSessionNames(filtered);
+      }
+      localStorage.removeItem(KEY);
+      setView();
+      cardsEl.innerHTML = '';
+      hideMessage();
+    };
+
+    // --- Mice actions ---
+    document.getElementById('addBtn').onclick = () => {
+      const input = document.getElementById('mouseInput');
+      if (!input) return;
+      const id = input.value.trim();
+      if (!id) { showMessage('Please enter a mouse ID.'); input.focus(); return; }
+      const s = load();
+      if (!s.session) return;
+      if (s.mice.some(m => m.id === id)) { showMessage(`ID "${id}" is already used in this session.`); input.focus(); return; }
+      const m = newMouse(id);
+      s.mice.push(m);
+      save(s);
+      input.value = '';
+      hideMessage();
+      cardsEl.appendChild(createCardElement(m));
+    };
+    document.getElementById('mouseInput').onkeydown = e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); };
+
+    // Efficient event delegation using pointer events (faster on mobile). Works with role=button divs.
+    function handleCardActionEvent(target) {
+      const el = (target && target.closest) ? target.closest('[data-letter], [data-undo], .trash') : null;
+      if (!el) return;
+      const s = load();
+      if (!s.session) return;
+
+      // Letter buttons
+      if (el.dataset.letter) {
+        const id = el.dataset.id;
+        const m = s.mice.find(x => x.id === id);
+        if (!m) return;
+        m.seq.push(el.dataset.letter);
+        save(s);
+        const card = el.closest('.card');
+        if (card) updateCardElement(card, m);
+        return;
+      }
+
+      // Undo
+      if (el.dataset.undo) {
+        const id = el.dataset.undo;
+        const m = s.mice.find(x => x.id === id);
+        if (!m) return;
+        if (m.seq.length > 1) m.seq.pop();
+        save(s);
+        const card = el.closest('.card');
+        if (card) updateCardElement(card, m);
+        return;
+      }
+
+      // Trash (delete)
+      if (el.classList.contains('trash')) {
+        const id = el.dataset.id;
+        const mouse = s.mice.find(x => x.id === id);
+        const confirmMsg = mouse ? `Delete mouse "${mouse.id}"? This removes its entries.` : 'Delete this mouse?';
+        if (!window.confirm(confirmMsg)) return;
+        s.mice = s.mice.filter(x => x.id !== id);
+        save(s);
+        const card = el.closest('.card');
+        if (card) card.remove();
+        return;
+      }
+    }
+
+    const supportsPointerEvents = 'PointerEvent' in window;
+    if (supportsPointerEvents) {
+      cardsEl.addEventListener('pointerdown', e => {
+        if (e.button && e.button !== 0) return;
+        handleCardActionEvent(e.target);
+        if (e.pointerType === 'touch') e.preventDefault();
+      });
+    } else {
+      cardsEl.addEventListener('click', e => handleCardActionEvent(e.target));
+    }
+    // keyboard support for accessible div buttons
+    cardsEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleCardActionEvent(e.target);
+      }
+    });
+
+    // --- Timer ---
+    let rafId = null;
+    function tick() {
+      const s = load();
+      if (!s.timer.running) return;
+      const now = Date.now();
+      const last = s.timer.last || now;
+      const dt = Math.floor((now - last) / 1000);
+      if (dt > 0) {
+        s.timer.remaining = Math.max(0, s.timer.remaining - dt);
+        s.timer.last = now;
+        if (s.timer.remaining === 0) {
+          s.timer.running = false;
+          s.timer.last = null;
+          // show modal centered for 3s and block all other controls while visible
+          showTimerModal(3000);
+        }
+        save(s);
+        timerDisplay.textContent = formatTime(s.timer.remaining);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    document.getElementById('timerPlay').onclick = () => { const s = load(); if (!s.session) return; if (!s.timer.running) { s.timer.running = true; s.timer.last = Date.now(); save(s); if (!rafId) rafId = requestAnimationFrame(tick); } };
+    document.getElementById('timerPause').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; save(s); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+    document.getElementById('timerReset').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; s.timer.remaining = s.timer.duration; save(s); render(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+    timerMinutes.onchange = () => { const mins = Math.max(1, parseInt(timerMinutes.value || '8', 10)); const s = load(); s.timer.duration = mins * 60; s.timer.remaining = s.timer.duration; s.timer.running = false; s.timer.last = null; save(s); render(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+
+    // --- Zoom controls ---
+    function setZoom(z) {
+      const s = load();
+      s.uiZoom = Math.max(0.4, Math.min(1.6, Number(z)));
+      save(s);
+      document.documentElement.style.setProperty('--zoom', s.uiZoom);
+      // Update zoom display
+      const percent = Math.round(s.uiZoom * 100);
+      document.getElementById('zoomValue').textContent = `${percent}%`;
+    }
+    document.getElementById('zoomIn').onclick = () => { const s = load(); setZoom((s.uiZoom || 1) * 1.1); };
+    document.getElementById('zoomOut').onclick = () => { const s = load(); setZoom((s.uiZoom || 1) / 1.1); };
+    document.getElementById('zoomReset').onclick = () => { setZoom(1); };
+
+    // --- CSV Export ---
+    document.getElementById('exportBtn').onclick = () => {
+      const s = load();
+      if (!s.session) return;
+
+      const sep = ';'; // change to ',' or '\t' if you prefer
+      const rows = [['session', 'startedAt', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
+      for (const m of s.mice) {
         const r = computeStats(m.seq);
         // keep CSV precision here (2 decimals)
         rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join('')]);
-    }
+      }
 
-    function escapeCell(v) {
+      function escapeCell(v) {
         const str = v == null ? '' : String(v);
         // escape if contains quote, newline or the separator
         if (new RegExp(`[;"\\n\\r${sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}]`).test(str)) return '"' + str.replace(/"/g, '""') + '"';
         return str;
-    }
-
-    // Excel-friendly header + semicolon-separated values + UTF-8 BOM
-    const sepLine = `sep=${sep}`;
-    const csv = sepLine + '\r\n' + rows.map(r => r.map(escapeCell).join(sep)).join('\r\n');
-
-    // Use Excel MIME type to improve recognition when downloading/opening
-    const blob = new Blob(['\uFEFF', csv], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-
-    const a = document.createElement('a');
-    const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
-    a.href = URL.createObjectURL(blob);
-    a.download = `${s.session.name}_${ts}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-};
-
-
-// --- Service worker ---
-let _reloadingForUpdate=false;
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.addEventListener('message',event=>{
-    if(event.data && event.data.type==='NEW_VERSION_AVAILABLE' && !_reloadingForUpdate){
-      if(updateBanner) updateBanner.classList.remove('hidden');
-    }
-  });
-  window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js'));
-}
-async function clearDeviceDataBeforeReload(){
-  try{localStorage.clear();}catch(e){}
-  try{sessionStorage.clear();}catch(e){}
-  if('caches' in window){
-    try{
-      const keys=await caches.keys();
-      await Promise.all(keys.map(k=>caches.delete(k)));
-    }catch(e){}
-  }
-  if(navigator.storage && navigator.storage.getDirectory){
-    try{
-      const root=await navigator.storage.getDirectory();
-      const removals=[];
-      for await (const [name] of root.entries()){
-        removals.push(root.removeEntry(name,{recursive:true}));
       }
-      await Promise.all(removals);
-    }catch(e){}
-  }
-  if(window.indexedDB && indexedDB.databases){
-    try{
-      const dbs=await indexedDB.databases();
-      await Promise.all(dbs.map(db=>db && db.name ? new Promise(res=>{
-        const req=indexedDB.deleteDatabase(db.name);
-        req.onsuccess=req.onerror=req.onblocked=()=>res();
-      }):Promise.resolve()));
-    }catch(e){}
-  }
-}
 
-if(updateReloadBtn){
-  updateReloadBtn.addEventListener('click',async()=>{
-    if(_reloadingForUpdate) return;
-    _reloadingForUpdate=true;
-    updateReloadBtn.disabled=true;
-    await clearDeviceDataBeforeReload();
-    window.location.reload();
-  });
-}
-applyZoomFromState();
-render();
-</script>
+      // Excel-friendly header + semicolon-separated values + UTF-8 BOM
+      const sepLine = `sep=${sep}`;
+      const csv = sepLine + '\r\n' + rows.map(r => r.map(escapeCell).join(sep)).join('\r\n');
+
+      // Use Excel MIME type to improve recognition when downloading/opening
+      const blob = new Blob(['\uFEFF', csv], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
+      a.href = URL.createObjectURL(blob);
+      a.download = `${s.session.name}_${ts}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+
+
+    // --- Service worker ---
+    let _reloadingForUpdate = false;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE' && !_reloadingForUpdate) {
+          if (updateBanner) updateBanner.classList.remove('hidden');
+        }
+      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
+    }
+    async function clearDeviceDataBeforeReload() {
+      try { localStorage.clear(); } catch (e) { }
+      try { sessionStorage.clear(); } catch (e) { }
+      if ('caches' in window) {
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        } catch (e) { }
+      }
+      if (navigator.storage && navigator.storage.getDirectory) {
+        try {
+          const root = await navigator.storage.getDirectory();
+          const removals = [];
+          for await (const [name] of root.entries()) {
+            removals.push(root.removeEntry(name, { recursive: true }));
+          }
+          await Promise.all(removals);
+        } catch (e) { }
+      }
+      if (window.indexedDB && indexedDB.databases) {
+        try {
+          const dbs = await indexedDB.databases();
+          await Promise.all(dbs.map(db => db && db.name ? new Promise(res => {
+            const req = indexedDB.deleteDatabase(db.name);
+            req.onsuccess = req.onerror = req.onblocked = () => res();
+          }) : Promise.resolve()));
+        } catch (e) { }
+      }
+    }
+
+    if (updateReloadBtn) {
+      updateReloadBtn.addEventListener('click', async () => {
+        if (_reloadingForUpdate) return;
+        _reloadingForUpdate = true;
+        updateReloadBtn.disabled = true;
+        await clearDeviceDataBeforeReload();
+        window.location.reload();
+      });
+    }
+    applyZoomFromState();
+    render();
+  </script>
 </body>
+
 </html>
