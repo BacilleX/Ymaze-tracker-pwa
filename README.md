@@ -36,7 +36,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 - `sequence` concatenates the letters recorded for that subject.
 - `alternances` counts every correct alternation (three successive, different arms).
 - The alternation ratio is exported with three decimals:  
-  `ratio_percent = (good_alternations / (total_entries - 2)) * 100`  
+  `ratio_percent = (good_alternations) / (total_entries - 2) * 100`  
   (If `total_entries <= 2`, the ratio is defined as 0.)
 - Output is Excel-friendly thanks to the semicolon separator, `sep=;` header, and UTF‑8 BOM. If Excel still shows a single column, import the file and specify semicolon as the delimiter.
 
