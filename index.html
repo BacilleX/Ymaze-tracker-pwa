@@ -654,6 +654,7 @@
       <div style="text-align: center; margin-bottom: 16px;">
         Check out my GitHub: <a href="https://github.com/BacilleX" target="_blank" rel="noopener noreferrer">Alexis
           Chaussy</a>
+        <br><span id="appVersion" style="font-size: 0.8em; color: var(--muted);">...</span>
       </div>
 
       <header>
@@ -1258,6 +1259,19 @@
         window.location.reload();
       });
     }
+
+    // --- Auto Version Display ---
+    fetch('./service-worker.js')
+      .then(r => r.text())
+      .then(t => {
+        const m = t.match(/const CACHE\s*=\s*['"]ymaze-tracker-pwa-(v[\d.]+)['"]/);
+        if (m && m[1]) {
+          const el = document.getElementById('appVersion');
+          if (el) el.textContent = m[1];
+        }
+      })
+      .catch(() => {/* ignore version fetch error */ });
+
     applyZoomFromState();
     render();
   </script>
