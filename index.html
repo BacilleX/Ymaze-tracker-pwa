@@ -691,7 +691,9 @@
             <div class="timer-left">
               <div class="timer-main">
                 <span class="time" id="timerDisplay">08:00</span>
-                <label>Duration (min): <input id="timerMinutes" type="number" min="1" value="8"></label>
+                <label>Duration: <input id="timerMinutes" type="number" min="0" value="8" style="width: 60px;"> m
+                </label>
+                <label><input id="timerSeconds" type="number" min="0" max="59" value="0" style="width: 60px;"> s</label>
               </div>
               <div class="timer-actions">
                 <button id="timerPlay" class="btn btn-primary">Play</button>
@@ -761,6 +763,7 @@
       cardsEl = document.getElementById('cards'),
       timerDisplay = document.getElementById('timerDisplay'),
       timerMinutes = document.getElementById('timerMinutes'),
+      timerSeconds = document.getElementById('timerSeconds'),
       feedbackEl = document.getElementById('feedback'),
       updateBanner = document.getElementById('updateBanner'),
       updateReloadBtn = document.getElementById('updateReload');
@@ -990,7 +993,8 @@
       const s = load();
       if (!s.session) return;
       applyZoomFromState();
-      timerMinutes.value = Math.round(s.timer.duration / 60);
+      timerMinutes.value = Math.floor(s.timer.duration / 60);
+      timerSeconds.value = s.timer.duration % 60;
       timerDisplay.textContent = formatTime(s.timer.remaining);
       cardsEl.innerHTML = '';
       for (const m of s.mice) {
@@ -1157,7 +1161,21 @@
     document.getElementById('timerPlay').onclick = () => { const s = load(); if (!s.session) return; if (!s.timer.running) { s.timer.running = true; s.timer.last = Date.now(); save(s); if (!rafId) rafId = requestAnimationFrame(tick); } };
     document.getElementById('timerPause').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; save(s); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
     document.getElementById('timerReset').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; s.timer.remaining = s.timer.duration; save(s); render(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
-    timerMinutes.onchange = () => { const mins = Math.max(1, parseInt(timerMinutes.value || '8', 10)); const s = load(); s.timer.duration = mins * 60; s.timer.remaining = s.timer.duration; s.timer.running = false; s.timer.last = null; save(s); render(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+    const handleTimerChange = () => {
+      const mins = Math.max(0, parseInt(timerMinutes.value || '0', 10));
+      const secs = Math.max(0, parseInt(timerSeconds.value || '0', 10));
+      const total = mins * 60 + secs;
+      const s = load();
+      s.timer.duration = Math.max(1, total);
+      s.timer.remaining = s.timer.duration;
+      s.timer.running = false;
+      s.timer.last = null;
+      save(s);
+      render();
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    };
+    timerMinutes.onchange = handleTimerChange;
+    timerSeconds.onchange = handleTimerChange;
 
     // --- Zoom controls ---
     function setZoom(z) {
