@@ -1004,6 +1004,7 @@
 
     // --- Session actions ---
     const handleCreateSession = () => {
+      stopTimerAnimation();
       const input = document.getElementById('sessionName');
       if (!input) return;
       const name = input.value.trim();
@@ -1043,6 +1044,7 @@
     if (sessionRenameInput) sessionRenameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleRenameSession(); } if (e.key === 'Escape') { e.preventDefault(); toggleRenameForm(false); } });
     document.getElementById('newSession').onclick = () => {
       if (!confirm('Create new session? Unsaved data will be lost.')) return;
+      stopTimerAnimation();
       const state = load();
       const currentName = state && state.session ? state.session.name : null;
       if (currentName) {
@@ -1138,9 +1140,23 @@
 
     // --- Timer ---
     let rafId = null;
+    function stopTimerAnimation() {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    }
+
     function tick() {
       const s = load();
-      if (!s.timer.running) return;
+      if (!s || !s.timer) {
+        stopTimerAnimation();
+        return;
+      }
+      if (!s.timer.running) {
+        stopTimerAnimation();
+        return;
+      }
       const now = Date.now();
       const last = s.timer.last || now;
       const dt = Math.floor((now - last) / 1000);
@@ -1159,8 +1175,8 @@
       rafId = requestAnimationFrame(tick);
     }
     document.getElementById('timerPlay').onclick = () => { const s = load(); if (!s.session) return; if (!s.timer.running) { s.timer.running = true; s.timer.last = Date.now(); save(s); if (!rafId) rafId = requestAnimationFrame(tick); } };
-    document.getElementById('timerPause').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; save(s); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
-    document.getElementById('timerReset').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; s.timer.remaining = s.timer.duration; save(s); render(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } };
+    document.getElementById('timerPause').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; save(s); stopTimerAnimation(); };
+    document.getElementById('timerReset').onclick = () => { const s = load(); s.timer.running = false; s.timer.last = null; s.timer.remaining = s.timer.duration; save(s); render(); stopTimerAnimation(); };
     const handleTimerChange = () => {
       const mins = Math.max(0, parseInt(timerMinutes.value || '0', 10));
       const secs = Math.max(0, parseInt(timerSeconds.value || '0', 10));
@@ -1172,7 +1188,7 @@
       s.timer.last = null;
       save(s);
       render();
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      stopTimerAnimation();
     };
     timerMinutes.onchange = handleTimerChange;
     timerSeconds.onchange = handleTimerChange;
