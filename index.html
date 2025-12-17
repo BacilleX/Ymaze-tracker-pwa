@@ -405,14 +405,15 @@
 
     .timer-main {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
       width: 100%
     }
 
     .timer-main label {
-      width: 100%
+      width: auto
     }
 
     .timer label {
@@ -441,7 +442,8 @@
       color: #fff;
       padding: 8px 12px;
       border-radius: 10px;
-      letter-spacing: .03em
+      letter-spacing: .03em;
+      width: 100%;
     }
 
     .zoom-controls {
@@ -651,8 +653,7 @@
 
       <div id="feedback" class="alert alert-error hidden" role="alert"></div>
       <div id="updateBanner" class="alert alert-success hidden" role="status" aria-live="polite">
-        <span>Une nouvelle version est disponible. Recharger effacera toutes les données enregistrées sur cet
-          appareil.</span>
+        <span>A new version is available. Recharging will erase all data stored on this device.</span>
         <button id="updateReload" class="btn btn-primary">Recharger la page</button>
       </div>
       <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
