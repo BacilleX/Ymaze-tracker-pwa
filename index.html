@@ -236,6 +236,13 @@
       width: 80px
     }
 
+    /* Fix for mobile: prevent timer inputs from stretching */
+    .timer input[type=number] {
+      flex: none;
+      width: 60px;
+      /* or use auto to respect inline style */
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
