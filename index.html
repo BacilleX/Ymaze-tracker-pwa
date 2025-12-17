@@ -568,6 +568,23 @@
       /* Left align on desktop */
     }
 
+    .notes-area {
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .notes-area textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 60px;
+      background: #f8fafc;
+      font-size: 0.9rem;
+    }
+
     @media (max-width:720px) {
       .panel {
         padding: 14px
@@ -754,7 +771,7 @@
     const storeSessionNames = names => localStorage.setItem(SESSION_NAMES_KEY, JSON.stringify(names));
     const rememberSessionName = name => { const names = loadSessionNames(); if (!names.includes(name)) { names.push(name); storeSessionNames(names); } };
     function newState(name) { const m = 8; return { session: { name, startedAt: new Date().toISOString() }, mice: [], timer: { duration: m * 60, remaining: m * 60, running: false, last: null }, uiZoom: 1 }; }
-    function newMouse(id) { return { id, seq: ['C'] }; }
+    function newMouse(id) { return { id, seq: ['C'], notes: '' }; }
 
     // --- Stats ---
     function computeStats(seq) {
@@ -995,6 +1012,27 @@
       divActions.appendChild(btnUndo);
 
       c.appendChild(divActions);
+
+      // -- Notes --
+      const divNotes = document.createElement('div');
+      divNotes.className = 'notes-area';
+      const txtNotes = document.createElement('textarea');
+      txtNotes.placeholder = 'Notes...';
+      txtNotes.value = m.notes || '';
+      // Save notes on input
+      txtNotes.oninput = (e) => {
+        const s = load();
+        if (!s.session) return;
+        const target = s.mice.find(x => x.id === m.id);
+        if (target) {
+          target.notes = e.target.value;
+          save(s);
+          // update local object too to avoid stale state if re-rendered from this object ref
+          m.notes = e.target.value;
+        }
+      };
+      divNotes.appendChild(txtNotes);
+      c.appendChild(divNotes);
 
       return c;
     }
@@ -1264,11 +1302,11 @@
       if (!s.session) return;
 
       const sep = ';'; // change to ',' or '\t' if you prefer
-      const rows = [['session', 'startedAt', 'duration_seconds', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
+      const rows = [['session', 'startedAt', 'duration_seconds', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence', 'notes']];
       for (const m of s.mice) {
         const r = computeStats(m.seq);
         // keep CSV precision here (2 decimals)
-        rows.push([s.session.name, s.session.startedAt, s.timer.duration, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join('')]);
+        rows.push([s.session.name, s.session.startedAt, s.timer.duration, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join(''), m.notes || '']);
       }
 
       function escapeCell(v) {
