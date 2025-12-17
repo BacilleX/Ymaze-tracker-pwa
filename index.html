@@ -1083,6 +1083,7 @@
       const existingNames = loadSessionNames();
       if (existingNames.includes(name)) { showMessage('This session name already exists.'); input.focus(); return; }
       save(newState(name));
+      history.pushState({ session: true }, '', '');
       rememberSessionName(name);
       input.value = '';
       hideMessage();
@@ -1405,6 +1406,21 @@
         // Trigger browser confirmation dialog
         e.preventDefault();
         e.returnValue = '';
+      }
+    });
+
+    // --- History API Back Button Interception (Mobile) ---
+    window.addEventListener('popstate', (e) => {
+      const s = load();
+      if (s && s.session) {
+        // User hit back during session
+        if (!confirm('Session in progress. Are you sure you want to leave? Data may be lost.')) {
+          // User wants to STAY. Push state back to prevent leaving.
+          history.pushState({ session: true }, '', '');
+        } else {
+          // User wants to LEAVE.
+          // We are already at the previous state (due to the pop), so let it happen.
+        }
       }
     });
 
