@@ -12,12 +12,15 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 - **Why it matters:** It replaces handwritten notes, speeds data collection during live trials, enforces consistent formatting, and reduces transcription errors while keeping everything available offline.
 
 ## Core Features
-- Your data stays on your device
+- Your data stays on your device.
 - Per-subject cards to add/remove subjects, append A/B/C entries, and undo the last input.
-- Automatic metrics: total entries, number of correct alternations, alternation ratio.
-- Session timer with modal alert when the countdown hits zero.
+- **Notes field** per subject for qualitative observations (e.g., escape, freezing, grooming....).
+- Automatic metrics: total entries, number of correct triads, alternation ratio.
+- Configurable session timer (minutes & seconds) with a **hard-stop modal** that blocks input when time is up.
+- **Mobile-friendly mini timer** ensures the countdown is always visible while scrolling.
+- **Data Safety**: Prevents accidental "Back" navigation during active sessions.
 - Zoom controls plus responsive layout that works on phones, tablets, and desktops.
-- Offline readiness (service worker + local storage) so sessions persist between visits.
+- Offline readiness (service worker) so sessions persist between visits.
 - Excel-friendly CSV export (semicolon separator, `sep=;` hint, UTF‑8 BOM).
 
 ## Screenshots
@@ -32,7 +35,7 @@ Live application / installable PWA: https://bacillex.github.io/Ymaze-tracker-pwa
 5. Use **Export** to download a CSV snapshot of the session.
 
 ## CSV Export Details
-- Columns: `session`, `startedAt`, `mouse_id`, `entries`, `alternances`, `ratio_percent`, `sequence`.
+- Columns: `session`, `startedAt`, `duration_seconds`, `mouse_id`, `entries`, `alternances`, `ratio_percent`, `sequence`, `notes`.
 - `sequence` concatenates the letters recorded for that subject.
 - `alternances` counts every correct alternation (three successive, different arms).
 - The alternation ratio is exported with three decimals:  
