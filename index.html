@@ -621,26 +621,6 @@
         white-space: nowrap;
       }
     }
-
-    @media (max-width:540px) {
-      .grid {
-        grid-template-columns: 1fr
-      }
-
-      .actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
-      }
-
-      .timer .time {
-        font-size: 1.1rem;
-        padding: 6px 10px
-      }
-
-      .seq {
-        font-size: 1.05rem;
-        line-height: 24px
-      }
-    }
   </style>
 
   <script defer src="https://cloud.umami.is/script.js" data-website-id="bf3b6e9e-d4ba-48e4-8c1f-3f94d46f9dc7"></script>
@@ -767,6 +747,7 @@
       feedbackEl = document.getElementById('feedback'),
       updateBanner = document.getElementById('updateBanner'),
       updateReloadBtn = document.getElementById('updateReload');
+
     let feedbackTimeout = null;
     function hideMessage() { if (!feedbackEl) return; clearTimeout(feedbackTimeout); feedbackEl.classList.add('hidden'); }
     function showMessage(message, type = 'error') {
@@ -887,7 +868,7 @@
 
       // Main container
       const c = document.createElement('article');
-      c.className = 'card';
+      c.className = 'card mouse-card';
 
       // -- Header --
       const header = document.createElement('header');
@@ -995,11 +976,29 @@
       applyZoomFromState();
       timerMinutes.value = Math.floor(s.timer.duration / 60);
       timerSeconds.value = s.timer.duration % 60;
-      timerDisplay.textContent = formatTime(s.timer.remaining);
+
+      const timeStr = formatTime(s.timer.remaining);
+      timerDisplay.textContent = timeStr;
+
       cardsEl.innerHTML = '';
       for (const m of s.mice) {
         cardsEl.appendChild(createCardElement(m));
       }
+
+      // Add mini timer clone
+      const mini = document.createElement('article');
+      mini.className = 'card';
+      mini.style.display = 'flex';
+      mini.style.alignItems = 'center';
+      mini.style.justifyContent = 'center';
+      mini.style.background = '#0f172a';
+      mini.style.color = '#fff';
+      /* Compact styling */
+      mini.style.width = 'fit-content';
+      mini.style.margin = '0 auto';  /* Center in grid cell */
+      mini.style.padding = '12px 24px';
+      mini.innerHTML = `<div style="text-align:center;"><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; margin-bottom:2px;">Timer</div><div id="miniTimerDisplay" style="font-size:1.5rem; font-weight:900;">${timeStr}</div></div>`;
+      cardsEl.appendChild(mini);
     }
 
     // --- Session actions ---
@@ -1071,7 +1070,12 @@
       save(s);
       input.value = '';
       hideMessage();
-      cardsEl.appendChild(createCardElement(m));
+      // Insert before the last child (mini timer)
+      if (cardsEl.lastChild) {
+        cardsEl.insertBefore(createCardElement(m), cardsEl.lastChild);
+      } else {
+        cardsEl.appendChild(createCardElement(m));
+      }
     };
     document.getElementById('mouseInput').onkeydown = e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); };
 
@@ -1170,7 +1174,10 @@
           showTimerModal(3000);
         }
         save(s);
-        timerDisplay.textContent = formatTime(s.timer.remaining);
+        const tStr = formatTime(s.timer.remaining);
+        timerDisplay.textContent = tStr;
+        const mini = document.getElementById('miniTimerDisplay');
+        if (mini) mini.textContent = tStr;
       }
       rafId = requestAnimationFrame(tick);
     }
