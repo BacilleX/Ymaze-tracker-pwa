@@ -1209,6 +1209,7 @@
     const supportsPointerEvents = 'PointerEvent' in window;
     if (supportsPointerEvents) {
       cardsEl.addEventListener('pointerdown', e => {
+        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
         if (e.button && e.button !== 0) return;
         handleCardActionEvent(e.target);
         if (e.pointerType === 'touch') e.preventDefault();
