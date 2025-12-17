@@ -1218,6 +1218,7 @@
     }
     // keyboard support for accessible div buttons
     cardsEl.addEventListener('keydown', e => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleCardActionEvent(e.target);
