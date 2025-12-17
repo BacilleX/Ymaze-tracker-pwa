@@ -548,9 +548,27 @@
       }
     }
 
+    /* Mini timer card responsive alignment */
+    .card-mini {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      color: #fff;
+      width: fit-content;
+      padding: 12px 24px;
+      margin: 0;
+      /* Left align on desktop */
+    }
+
     @media (max-width:720px) {
       .panel {
         padding: 14px
+      }
+
+      .card-mini {
+        margin: 0 auto;
+        /* Center on mobile */
       }
 
       .row {
@@ -995,16 +1013,7 @@
 
       // Add mini timer clone
       const mini = document.createElement('article');
-      mini.className = 'card';
-      mini.style.display = 'flex';
-      mini.style.alignItems = 'center';
-      mini.style.justifyContent = 'center';
-      mini.style.background = '#0f172a';
-      mini.style.color = '#fff';
-      /* Compact styling */
-      mini.style.width = 'fit-content';
-      mini.style.margin = '0 auto';  /* Center in grid cell */
-      mini.style.padding = '12px 24px';
+      mini.className = 'card card-mini';
       mini.innerHTML = `<div style="text-align:center;"><div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; margin-bottom:2px;">Timer</div><div id="miniTimerDisplay" style="font-size:1.5rem; font-weight:900;">${timeStr}</div></div>`;
       cardsEl.appendChild(mini);
     }
