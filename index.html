@@ -1044,11 +1044,18 @@
       showMessage('Nom de session mis à jour.', 'success');
     };
     document.getElementById('createSession').onclick = handleCreateSession;
-    document.getElementById('sessionName').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateSession(); } });
+    document.getElementById('sessionName').addEventListener('keydown', e => {
+      if (e.isComposing) return;
+      if (e.key === 'Enter') { e.preventDefault(); handleCreateSession(); }
+    });
     if (sessionRenameBtn) sessionRenameBtn.onclick = () => { const s = load(); if (!s.session) return; toggleRenameForm(true); };
     if (sessionRenameCancel) sessionRenameCancel.onclick = () => toggleRenameForm(false);
     if (sessionRenameSave) sessionRenameSave.onclick = () => handleRenameSession();
-    if (sessionRenameInput) sessionRenameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handleRenameSession(); } if (e.key === 'Escape') { e.preventDefault(); toggleRenameForm(false); } });
+    if (sessionRenameInput) sessionRenameInput.addEventListener('keydown', e => {
+      if (e.isComposing) return;
+      if (e.key === 'Enter') { e.preventDefault(); handleRenameSession(); }
+      if (e.key === 'Escape') { e.preventDefault(); toggleRenameForm(false); }
+    });
     document.getElementById('newSession').onclick = () => {
       if (!confirm('Create new session? Unsaved data will be lost.')) return;
       stopTimerAnimation();
@@ -1085,7 +1092,10 @@
         cardsEl.appendChild(createCardElement(m));
       }
     };
-    document.getElementById('mouseInput').onkeydown = e => { if (e.key === 'Enter') document.getElementById('addBtn').click(); };
+    document.getElementById('mouseInput').onkeydown = e => {
+      if (e.isComposing) return;
+      if (e.key === 'Enter') document.getElementById('addBtn').click();
+    };
 
     // Efficient event delegation using pointer events (faster on mobile). Works with role=button divs.
     function handleCardActionEvent(target) {
