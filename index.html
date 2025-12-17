@@ -1264,11 +1264,11 @@
       if (!s.session) return;
 
       const sep = ';'; // change to ',' or '\t' if you prefer
-      const rows = [['session', 'startedAt', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
+      const rows = [['session', 'startedAt', 'duration_seconds', 'mouse_id', 'entries', 'alternances', 'ratio_percent', 'sequence']];
       for (const m of s.mice) {
         const r = computeStats(m.seq);
         // keep CSV precision here (2 decimals)
-        rows.push([s.session.name, s.session.startedAt, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join('')]);
+        rows.push([s.session.name, s.session.startedAt, s.timer.duration, m.id, r.entries, r.alters, formatRatio(r.ratio), m.seq.join('')]);
       }
 
       function escapeCell(v) {
