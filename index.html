@@ -445,7 +445,12 @@
       padding: 8px 12px;
       border-radius: 10px;
       letter-spacing: .03em;
-      width: 100%;
+      letter-spacing: .03em;
+      width: fit-content;
+    }
+
+    .time-wrapper {
+      width: auto;
     }
 
     .zoom-controls {
@@ -573,6 +578,11 @@
         /* Center on mobile */
       }
 
+      .time-wrapper {
+        width: 100%;
+        /* Force break on mobile */
+      }
+
       .row {
         flex-direction: column;
         align-items: stretch
@@ -698,7 +708,9 @@
           <div class="timer">
             <div class="timer-left">
               <div class="timer-main">
-                <span class="time" id="timerDisplay">08:00</span>
+                <div class="time-wrapper">
+                  <span class="time" id="timerDisplay">08:00</span>
+                </div>
                 <label>Duration: <input id="timerMinutes" type="number" min="0" value="8" style="width: 60px;"> m
                 </label>
                 <label><input id="timerSeconds" type="number" min="0" max="59" value="0" style="width: 60px;"> s</label>
