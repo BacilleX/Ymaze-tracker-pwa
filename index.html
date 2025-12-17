@@ -1396,6 +1396,17 @@
       })
       .catch(() => {/* ignore version fetch error */ });
 
+    // --- Navigation Warning ---
+    window.addEventListener('beforeunload', (e) => {
+      if (_reloadingForUpdate) return; // Allow update reload
+      const s = load();
+      if (s && s.session) {
+        // Trigger browser confirmation dialog
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
     applyZoomFromState();
     render();
   </script>
