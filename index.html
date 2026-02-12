@@ -74,28 +74,11 @@
       min-width: 300px;
       max-width: 90%;
       text-align: center;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .modal-title {
       font-weight: 900;
       font-size: 3rem;
+      color: #ffffff;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      line-height: 1.1;
-    }
-
-    .modal-content .modal-ok.btn-text {
-      min-width: 120px;
-      background: #ffffff;
-      color: #7f1d1d;
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      box-shadow: none;
-      font-weight: 800;
     }
 
     * {
@@ -607,10 +590,6 @@
         padding: 14px
       }
 
-      .modal-title {
-        font-size: 2.2rem;
-      }
-
       .card-mini {
         display: flex;
         /* Show on mobile */
@@ -727,13 +706,9 @@
             data stored on this device.</span></span>
         <button id="updateReload" class="btn btn-primary">Reload page</button>
       </div>
-      <!-- Timer modal — shown when time is up. Blocks interaction until user confirms. -->
-      <div id="timerModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="timerModalTitle"
-        aria-hidden="true" tabindex="-1">
-        <div class="modal-content">
-          <div id="timerModalTitle" class="modal-title">Time is up</div>
-          <button id="timerModalOk" class="btn btn-text modal-ok" type="button">OK</button>
-        </div>
+      <!-- Timer modal — shown when time is up. Blocks interaction and stays for configured ms -->
+      <div id="timerModal" class="modal-overlay hidden" role="status" aria-live="assertive" aria-hidden="true">
+        <div class="modal-content">Time is up</div>
       </div>
 
       <section id="sessionCreate" class="panel">
@@ -790,36 +765,12 @@
     // --- Storage ---
     const KEY = 'ymaze.v4';
     const SESSION_NAMES_KEY = 'ymaze.sessionNames';
-    const MOBILE_DEFAULT_ZOOM = 0.91;
-    const DESKTOP_DEFAULT_ZOOM = 1;
     const load = () => JSON.parse(localStorage.getItem(KEY) || '{}');
     const save = s => localStorage.setItem(KEY, JSON.stringify(s));
     const loadSessionNames = () => { try { return JSON.parse(localStorage.getItem(SESSION_NAMES_KEY) || '[]'); } catch (e) { return []; } };
     const storeSessionNames = names => localStorage.setItem(SESSION_NAMES_KEY, JSON.stringify(names));
     const rememberSessionName = name => { const names = loadSessionNames(); if (!names.includes(name)) { names.push(name); storeSessionNames(names); } };
-    function isPhoneViewport() {
-      return window.matchMedia('(max-width: 720px)').matches && window.matchMedia('(pointer: coarse)').matches;
-    }
-    function getDefaultZoom() {
-      return isPhoneViewport() ? MOBILE_DEFAULT_ZOOM : DESKTOP_DEFAULT_ZOOM;
-    }
-    function clampZoom(value) {
-      return Math.max(0.4, Math.min(1.6, Number(value)));
-    }
-    function resolveZoom(state) {
-      const parsed = Number(state && state.uiZoom);
-      return Number.isFinite(parsed) ? clampZoom(parsed) : getDefaultZoom();
-    }
-    function applyZoom(z) {
-      const normalizedZoom = clampZoom(z);
-      document.documentElement.style.setProperty('--zoom', normalizedZoom);
-      const valueEl = document.getElementById('zoomValue');
-      if (valueEl) {
-        valueEl.textContent = `${Math.round(normalizedZoom * 100)}%`;
-      }
-      return normalizedZoom;
-    }
-    function newState(name) { const m = 8; return { session: { name, startedAt: new Date().toISOString() }, mice: [], timer: { duration: m * 60, remaining: m * 60, running: false, last: null }, uiZoom: resolveZoom(load()) }; }
+    function newState(name) { const m = 8; return { session: { name, startedAt: new Date().toISOString() }, mice: [], timer: { duration: m * 60, remaining: m * 60, running: false, last: null }, uiZoom: 1 }; }
     function newMouse(id) { return { id, seq: ['C'], notes: '' }; }
 
     // --- Stats ---
@@ -870,7 +821,7 @@
     }
     // --- Timer modal helpers ---
     const timerModal = document.getElementById('timerModal');
-    const timerModalOk = document.getElementById('timerModalOk');
+    const modalContent = timerModal ? timerModal.querySelector('.modal-content') : null;
     let _disabledDuringModal = [];
     function disableAllInteractiveExceptModal() {
       _disabledDuringModal = [];
@@ -912,25 +863,24 @@
       }
       _disabledDuringModal = [];
     }
-    function closeTimerModal() {
+    // show modal for ms milliseconds (non-dismissible during that time)
+    function showTimerModal(ms = 3000) {
       if (!timerModal) return;
-      timerModal.classList.add('hidden');
-      timerModal.classList.remove('visible');
-      timerModal.setAttribute('aria-hidden', 'true');
-      restoreInteractiveAfterModal();
-    }
-    // Show modal and keep it visible until user clicks OK.
-    function showTimerModal() {
-      if (!timerModal) return;
+      // show
       timerModal.classList.remove('hidden');
       timerModal.classList.add('visible');
       timerModal.setAttribute('aria-hidden', 'false');
       disableAllInteractiveExceptModal();
-      try {
-        if (timerModalOk) timerModalOk.focus(); else timerModal.focus();
-      } catch (e) { }
+      // ensure modal is focused to prevent accidental focus elsewhere
+      try { timerModal.focus(); } catch (e) { }
+      // dismiss after ms and restore
+      setTimeout(() => {
+        timerModal.classList.add('hidden');
+        timerModal.classList.remove('visible');
+        timerModal.setAttribute('aria-hidden', 'true');
+        restoreInteractiveAfterModal();
+      }, ms);
     }
-    if (timerModalOk) timerModalOk.addEventListener('click', closeTimerModal);
     function setView() {
       const s = load();
       if (!s.session) {
@@ -949,11 +899,7 @@
       }
       hideMessage();
     }
-    function applyZoomFromState() {
-      const s = load();
-      const z = resolveZoom(s);
-      applyZoom(z);
-    }
+    function applyZoomFromState() { const s = load(); const z = (s && s.uiZoom) ? s.uiZoom : 1; document.documentElement.style.setProperty('--zoom', z); const valueEl = document.getElementById('zoomValue'); if (valueEl) { valueEl.textContent = `${Math.round(z * 100)}%`; } }
     function formatTime(sec) { const mm = String(Math.floor(sec / 60)).padStart(2, '0'); const ss = String(sec % 60).padStart(2, '0'); return `${mm}:${ss}`; }
 
     function toggleRenameForm(show) {
@@ -1309,8 +1255,8 @@
         if (s.timer.remaining === 0) {
           s.timer.running = false;
           s.timer.last = null;
-          // show blocking modal until explicit acknowledgment
-          showTimerModal();
+          // show modal centered for 3s and block all other controls while visible
+          showTimerModal(3000);
         }
         save(s);
         const tStr = formatTime(s.timer.remaining);
@@ -1342,13 +1288,16 @@
     // --- Zoom controls ---
     function setZoom(z) {
       const s = load();
-      s.uiZoom = clampZoom(z);
+      s.uiZoom = Math.max(0.4, Math.min(1.6, Number(z)));
       save(s);
-      applyZoom(s.uiZoom);
+      document.documentElement.style.setProperty('--zoom', s.uiZoom);
+      // Update zoom display
+      const percent = Math.round(s.uiZoom * 100);
+      document.getElementById('zoomValue').textContent = `${percent}%`;
     }
-    document.getElementById('zoomIn').onclick = () => { const s = load(); setZoom(resolveZoom(s) * 1.1); };
-    document.getElementById('zoomOut').onclick = () => { const s = load(); setZoom(resolveZoom(s) / 1.1); };
-    document.getElementById('zoomReset').onclick = () => { setZoom(getDefaultZoom()); };
+    document.getElementById('zoomIn').onclick = () => { const s = load(); setZoom((s.uiZoom || 1) * 1.1); };
+    document.getElementById('zoomOut').onclick = () => { const s = load(); setZoom((s.uiZoom || 1) / 1.1); };
+    document.getElementById('zoomReset').onclick = () => { setZoom(1); };
 
     // --- CSV Export ---
     document.getElementById('exportBtn').onclick = () => {
